@@ -1,0 +1,9 @@
+version: "3"
+services:
+  test-api:
+    build: ..
+    entrypoint: '/start-reload.sh'
+    ports:
+        - 8080:80
+    volumes:
+        - ./:/api_gateway

@@ -1,0 +1,7 @@
+RUN POETRY_VERSION=0.12.3 curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+ENV PATH=/root/.poetry/bin:$PATH
+RUN poetry config settings.virtualenvs.create false
+WORKDIR /app
+COPY pyproject.toml ./
+COPY poetry.lock ./
+RUN poetry install --no-ansi --no-interaction

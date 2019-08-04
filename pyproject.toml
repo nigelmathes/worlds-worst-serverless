@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "worlds_worst_serverless"
+version = "0.1.0"
+description = "The world's worst serverless architecture"
+authors = ["TruckThunders <nigelmathes@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.33.0"
+boto3 = "^1.9"
+
+[tool.poetry.dev-dependencies]
+black = {version = "^18.3-alpha.0", allows-prereleases = true}
+pytest = "^5.0"
+tox = "^3.13"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py37
+
+[testenv]
+whitelist_externals = poetry
+commands =
+    poetry install -vvv
+    poetry run pytest
+"""
+
+[tool.black]
+line-length = 88
+target_version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
