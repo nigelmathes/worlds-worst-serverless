@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/nigelmathes/worlds-worst-serverless.svg?branch=master)](https://travis-ci.org/nigelmathes/worlds-worst-serverless)
-[![codecov](https://codecov.io/gh/TechnionYP5777/project-name/branch/master/graph/badge.svg)](https://codecov.io/gh/nigelmathes/worlds-worst-serverless)
+[![codecov](https://codecov.io/gh/nigelmathes/worlds-worst-serverless/branch/master/graph/badge.svg)](https://codecov.io/gh/nigelmathes/worlds-worst-serverless)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/ambv/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # worlds-worst-serverless
 This is the world's worst serverless setup. It doesn't even start out as serverless - 
