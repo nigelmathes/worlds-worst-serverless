@@ -5,8 +5,8 @@
 
 # worlds-worst-serverless
 This is the world's worst serverless setup. It doesn't even start out as serverless - 
-it creates it own damned API gateway and expects that to drive all interactions with 
-some random serverless backend thing. 
+it has its own API gateway, running on a server, and drives all interactions with some
+ random serverless backend thing. 
 
 - Uses ```FastAPI``` for the API gateway.
 - Uses ```Docker``` to containerize the gateway.
@@ -16,6 +16,7 @@ some random serverless backend thing.
 - Uses ```pytest``` for testing.
 - Uses ```Tox``` without setup.py to standardize testing (or something).
 - Uses ```travisCI``` for continuous integration.
+- Uses ```codecov``` for coverage reporting.
 
 That's right, we're going all in on ```pyproject.toml```.
 

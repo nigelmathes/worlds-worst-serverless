@@ -18,7 +18,7 @@ install:
   - poetry install -v
 
 script:
-  - poetry run pytest -q --cov tests/
+  - poetry run pytest -q --cov .
 
 after_success:
   - codecov
