@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/nigelmathes/worlds-worst-serverless.svg?branch=master)](https://travis-ci.org/nigelmathes/worlds-worst-serverless)
+[![codecov](https://codecov.io/gh/TechnionYP5777/project-name/branch/master/graph/badge.svg)](https://codecov.io/gh/nigelmathes/worlds-worst-serverless)
 
 # worlds-worst-serverless
 This is the world's worst serverless setup. It doesn't even start out as serverless - 
