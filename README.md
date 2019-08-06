@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nigelmathes/worlds-worst-serverless.svg?branch=master)](https://travis-ci.org/nigelmathes/worlds-worst-serverless)
+
 # worlds-worst-serverless
 This is the world's worst serverless setup. It doesn't even start out as serverless - 
 it creates it own damned API gateway and expects that to drive all interactions with 
