@@ -22,5 +22,5 @@ That's right, we're going all in on ```pyproject.toml```.
 
 #### From Project Directory:
 ```
-poetry run uvicorn api.api:app --reload
+poetry run uvicorn worlds_worst_serverless.api_gateway.api:app --reload
 ```
