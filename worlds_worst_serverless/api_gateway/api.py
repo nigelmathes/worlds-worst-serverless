@@ -12,8 +12,8 @@ from tempfile import TemporaryDirectory
 router = APIRouter()
 app = FastAPI()
 
-BUCKET_NAME = 'worlds_worst_serverless-bucket'
-S3 = boto3.client('s3', region_name='us-east-1')
+BUCKET_NAME = "worlds_worst_serverless-bucket"
+S3 = boto3.client("s3", region_name="us-east-1")
 
 
 @app.get("/")
@@ -46,7 +46,7 @@ async def gateway_portal() -> HTMLResponse:
               ./gateway.html
      """
     with codecs.open(
-            Path.cwd() / "api_gateway" / "templates" / "gateway.html", "r"
+        Path.cwd() / "api_gateway" / "templates" / "gateway.html", "r"
     ) as static_file:
         content = static_file.read()
 
