@@ -1,0 +1,41 @@
+service: machine-learning-package
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.6
+
+functions:
+  infer:
+    handler: handler.infer
+    timeout: 30
+    events:
+      - http:
+          path: infer
+          method: post
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+    slim: true
+    noDeploy:
+      - boto3
+      - botocore
+      - docutils
+      - jmespath
+      - pip
+      - python-dateutil
+      - s3transfer
+      - setuptools
+      - six
+      - tensorboard
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - models/**

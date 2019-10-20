@@ -4,24 +4,30 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # worlds-worst-serverless
-This is the world's worst serverless setup. It doesn't even start out as serverless - 
-it has its own API gateway, running on a server, and drives all interactions with some
- random serverless backend thing. 
+This is the world's worst serverless setup.
 
-- Uses ```FastAPI``` for the API gateway.
+- Uses ```FastAPI``` for the API gateway (if you need one).
 - Uses ```Docker``` to containerize the gateway.
-
 - Uses ```Black``` for code formatting.
 - Uses ```Poetry``` for packaging.
 - Uses ```pytest``` for testing.
 - Uses ```Tox``` without setup.py to standardize testing (or something).
 - Uses ```travisCI``` for continuous integration.
 - Uses ```codecov``` for coverage reporting.
+- Uses ```Serverless Framework``` for testing and deploying serverless apps.
 
-That's right, we're going all in on ```pyproject.toml```.
+This repo will be all in on ```pyproject.toml```.
 
-#### From Project Directory:
+# Some good Serverless Framework commands
 ```
-poetry run uvicorn worlds_worst_serverless.api_gateway.api:app --reload
+npm install -g serverless
+
+serverless config credentials --provider aws --key KEY --secret
+ SECRET
+
+serverless install -u https://github.com/serverless/examples/tree/master/aws-python-simple-http-endpoint
+
+serverless deploy -v
+
+serverless invoke local -f myFunction -l
 ```
-test

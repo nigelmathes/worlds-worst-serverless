@@ -4,3 +4,8 @@ dist/*
 .pytest_cache/*
 .tox/*
 .coverage
+world_worst_serverless/*/.serverless/*
+worlds_worst_serverless/*/node_modules/*
+worlds_worst_serverless/*/package.json
+worlds_worst_serverless/*/package-lock.json
+worlds_worst_serverless/*/.requirements.zip
