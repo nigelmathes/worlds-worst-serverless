@@ -34,6 +34,7 @@ def find_interesting_things(event: LambdaDict, context: LambdaDict) -> LambdaDic
         center_lon + offset_lon,
     )
 
+    # Set up the Overpass query and perform the request
     overpass_url = "http://overpass-api.de/api/interpreter"
     overpass_query = (
         f'[out:json];(node["amenity"]{bounding_box};'
@@ -46,14 +47,27 @@ def find_interesting_things(event: LambdaDict, context: LambdaDict) -> LambdaDic
     # Parse out interesting amenities
     bad_amenities = [
         'parking',
-        'toilets'
+        'toilets',
+        'shelter'
     ]
     interesting_things = dict()
     for element in data['elements']:
         if element['tags']['amenity'] not in bad_amenities:
+            # Try catches for dict elements
+            # If NO NAME or NO AMENITY TYPE appears, probably blacklist in bad_amenities
+            try:
+                name = element['tags']['name']
+            except KeyError:
+                continue
+            try:
+                amenity_type = element['tags']['amenity']
+            except KeyError:
+                continue
+
+            # Add entry to return dictionary
             interesting_things.update(
                 {
-                    element['tags']['name']: element['tags']['amenity']
+                    name: amenity_type
                 }
             )
 
