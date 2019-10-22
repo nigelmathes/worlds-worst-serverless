@@ -12,7 +12,13 @@ LambdaDict = Dict[str, Any]
 
 
 def find_interesting_things(event: LambdaDict, context: LambdaDict) -> LambdaDict:
-    """ Function to query OpenStreetMaps"""
+    """
+    Function do query OpenStreetMap
+
+    :param event: Input AWS Lambda event dict
+    :param context: Input AWS Lambda context dict
+    :return: Output AWS Lambda dict
+    """
     # Decode the request
     request_body = event.get('body')
     center_lat = float(request_body['lat'])

@@ -1,0 +1,20 @@
+service: worlds-worst-combat
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.7
+
+functions:
+  infer:
+    handler: handler.do_combat
+    timeout: 30
+    events:
+      - http:
+          path: combat
+          method: post
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
