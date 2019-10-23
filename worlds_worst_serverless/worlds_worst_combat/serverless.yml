@@ -1,4 +1,4 @@
-service: worlds-worst-combat
+service: worlds_worst_combat
 
 provider:
   name: aws
@@ -18,3 +18,4 @@ package:
   exclude:
     - node_modules/**
     - venv/**
+    - translate.py

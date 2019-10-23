@@ -5,12 +5,12 @@ Inflict is to cause an affliction and add a status effect
 Apply is to do something right away
 """
 import json
-from typing import Tuple
+from typing import Tuple, Any
 
-from .handler import Player
+Player = Any
 
 
-def apply_damage(value: int, player: Player) -> Player:
+def inflict_damage(value: int, player: Player) -> Player:
     """
     Deal damage
 
@@ -24,7 +24,7 @@ def apply_damage(value: int, player: Player) -> Player:
     return player
 
 
-def apply_percent_damage(value: int, player: Player) -> Player:
+def inflict_percent_damage(value: int, player: Player) -> Player:
     """
     Deal percent max health damage
 
@@ -38,7 +38,7 @@ def apply_percent_damage(value: int, player: Player) -> Player:
     return player
 
 
-def apply_heal(value: int, player: Player) -> Player:
+def inflict_heal(value: int, player: Player) -> Player:
     """
     Do healing
 
@@ -239,7 +239,7 @@ def apply_delayed_double_damage(player: Player, rules: dict, left: bool) -> Tupl
 
     :return: Updated Player and ruleset
     """
-    player = apply_damage(value=100, player=player)
+    player = inflict_damage(value=100, player=player)
 
     return player, rules
 
@@ -274,7 +274,6 @@ def apply_poison(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]
 
     :return: Updated Player and ruleset
     """
-    player = apply_percent_damage(value=10, player=player)
+    player = inflict_percent_damage(value=10, player=player)
 
     return player, rules
-

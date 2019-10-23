@@ -2,9 +2,11 @@
 Holds all combat logic
 """
 import json
-from typing import Tuple
-from .handler import Player
+from typing import Tuple, Any
+
 from . import combat_effects
+
+Player = Any
 
 
 def calculate_winner(rules: dict, left_attack: str, right_attack: str) -> str:
@@ -92,3 +94,64 @@ def apply_status(player1: Player, player2: Player, rules: dict) -> Tuple[Player,
         player2.status_effects = str(status_effects)
 
     return player1, player2, rules
+
+
+def find_ability(abilities: list, character_class: str, attack_type: str):
+    """
+    Function to find the right ability to use for a given combat outcome
+
+    :param abilities: List of dicts of abilities read in from abilities.json
+    :param character_class: Name of character class
+    :param attack_type: Name of attack
+    :return: Ability dict entry
+    """
+    # Find the ability to use
+    ability_to_use = {'effects': [], 'enhancements': []}
+    for ability in abilities:
+        if (ability['class'] == character_class) \
+                and (ability['type'] == attack_type):
+            ability_to_use = ability
+            break
+
+    return ability_to_use
+
+
+def apply_ability_effects(ability: dict, target: Player, self: Player) -> \
+        None:
+    """
+    Apply the effects of the given ability
+
+    :param ability: The ability dict
+    :param target: Target, as in enemy. The one being damaged, if damage is done
+    :param self: Self, as in the user of the ability.
+    """
+    for effect in ability['effects']:
+        if effect['target'] == 'target':
+            getattr(combat_effects, 'inflict_' + effect['effect'])(
+                value=effect['value'],
+                player=target)
+        elif effect['target'] == 'self':
+            getattr(combat_effects, 'inflict_' + effect['effect'])(
+                value=effect['value'],
+                player=self)
+
+
+def apply_enhancements(ability: dict, target: Player, self: Player) -> \
+        None:
+    """
+    Apply the effects of the given ability's enhancements
+
+    :param ability: The ability dict
+    :param target: Target, as in enemy. The one being damaged, if damage is done
+    :param self: Self, as in the user of the ability.
+    """
+    print(ability)
+    for enhancement in ability['enhancements']:
+        if enhancement['target'] == 'target':
+            getattr(combat_effects, 'inflict_' + enhancement['effect'])(
+                value=enhancement['value'],
+                player=target)
+        elif enhancement['target'] == 'self':
+            getattr(combat_effects, 'inflict_' + enhancement['effect'])(
+                value=enhancement['value'],
+                player=self)

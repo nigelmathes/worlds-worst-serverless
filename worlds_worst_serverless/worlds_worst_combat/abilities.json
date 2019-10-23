@@ -1,0 +1,714 @@
+[
+    {
+        "pk": 0,
+        "name": "Warp Space",
+        "type": "dodge",
+        "description": "Space seems to warp, causing your opponent\u2019s attack to miss",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Dreamer",
+        "enhancements": []
+    },
+    {
+        "pk": 1,
+        "name": "Blocking Wall",
+        "type": "block",
+        "description": "Pull up a wall from the ground in front of you to block",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Dreamer",
+        "enhancements": []
+    },
+    {
+        "pk": 2,
+        "name": "Micro Black Hole",
+        "type": "attack",
+        "description": "Warp space inside your opponent, dealing damage",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Dreamer",
+        "enhancements": []
+    },
+    {
+        "pk": 3,
+        "name": "Moving Sidewalk",
+        "type": "disrupt",
+        "description": "Pull the carpet out from under your opponent",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Dreamer",
+        "enhancements": [
+            {
+                "name": "Conveyor",
+                "effect": "prone",
+                "value": 1,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 4,
+        "name": "Fold Earth",
+        "type": "area",
+        "description": "Fold the world, sandwiching your opponent",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Dreamer",
+        "enhancements": [
+            {
+                "name": "Distort Earth",
+                "effect": "disorient",
+                "value": 1,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 5,
+        "name": "Bullet Time",
+        "type": "dodge",
+        "description": "You move so fast you could watch bullets stream past you",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chosen",
+        "enhancements": [
+            {
+                "name": "Extreme Speed",
+                "effect": "haste",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 6,
+        "name": "Blocking Palm",
+        "type": "block",
+        "description": "You deflect blows, spells, or projectiles with your hand",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chosen",
+        "enhancements": []
+    },
+    {
+        "pk": 7,
+        "name": "Punch",
+        "type": "attack",
+        "description": "You punch with the full force of ten people",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chosen",
+        "enhancements": [
+            {
+                "name": "Focused Punch",
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 8,
+        "name": "Pressure Point",
+        "type": "disrupt",
+        "description": "You strike a pressure point, causing the target to falter",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chosen",
+        "enhancements": []
+    },
+    {
+        "pk": 9,
+        "name": "Spin Kick",
+        "type": "area",
+        "description": "You perform a sweeping roundhouse kick",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chosen",
+        "enhancements": []
+    },
+    {
+        "pk": 10,
+        "name": "Slippery Compound",
+        "type": "dodge",
+        "description": "You spray a frictionless compound on the ground, and quickly slide away",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chemist",
+        "enhancements": []
+    },
+    {
+        "pk": 11,
+        "name": "Harden Clothing",
+        "type": "block",
+        "description": "The plastic-like compound on your clothes with hardens to block an attack",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chemist",
+        "enhancements": []
+    },
+    {
+        "pk": 12,
+        "name": "Poison Dart",
+        "type": "attack",
+        "description": "You fire a poison dart at the opponent",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chemist",
+        "enhancements": [
+            {
+                "name": "Caustic Dart",
+                "effect": "poison",
+                "value": 2,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 13,
+        "name": "Hallucination Gas",
+        "type": "disrupt",
+        "description": "You fire a gas canister which causes distracting hallucinations",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chemist",
+        "enhancements": []
+    },
+    {
+        "pk": 14,
+        "name": "Healing Compound",
+        "type": "area",
+        "description": "You spray a sticky compound in an area which turns into a gas that heals you.",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Chemist",
+        "enhancements": [
+            {
+                "name": "Reactive Goo",
+                "effect": "anti_area",
+                "value": 1,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 15,
+        "name": "Sidestep",
+        "type": "dodge",
+        "description": "As if predicting the future, you make the smallest motion to dodge the attack",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Cloistered",
+        "enhancements": [
+            {
+                "name": "High Ground",
+                "effect": "counter_attack",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 16,
+        "name": "Full Deflection",
+        "type": "block",
+        "description": "You use your weapon to deflect any strike",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Cloistered",
+        "enhancements": [
+            {
+                "name": "Broad Deflection",
+                "effect": "counter_disrupt",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 17,
+        "name": "Slash and Thrust",
+        "type": "attack",
+        "description": "You perform a melee attack",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Cloistered",
+        "enhancements": []
+    },
+    {
+        "pk": 18,
+        "name": "Invisible Force",
+        "type": "disrupt",
+        "description": "Holding out a hand, you force your opponent back",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Cloistered",
+        "enhancements": []
+    },
+    {
+        "pk": 19,
+        "name": "Blade Sweep",
+        "type": "area",
+        "description": "You perform a cleaving attack that hits an area",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Cloistered",
+        "enhancements": []
+    },
+    {
+        "pk": 20,
+        "name": "Rocket Shoes",
+        "type": "dodge",
+        "description": "Rocket boosters appear on your high-tops and jet you away",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Creator",
+        "enhancements": []
+    },
+    {
+        "pk": 21,
+        "name": "Call Armor",
+        "type": "block",
+        "description": "Armor materializes around your body, absorbing the blow",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Creator",
+        "enhancements": []
+    },
+    {
+        "pk": 22,
+        "name": "Conjure Weaponry",
+        "type": "attack",
+        "description": "A gun materializes in your hands, which you attack with",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Creator",
+        "enhancements": [
+            {
+                "name": "Modified Weaponry",
+                "effect": "random_gun",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 23,
+        "name": "Transport to Armory",
+        "type": "disrupt",
+        "description": "You teleport your opponent into your armory, where they are run over by shelving",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Creator",
+        "enhancements": [
+            {
+                "name": "Armory Shopping",
+                "effect": "random_gun",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 24,
+        "name": "Explosive Barrage",
+        "type": "area",
+        "description": "Grenades appear out of thin air, dropping on your target",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Creator",
+        "enhancements": []
+    },
+    {
+        "pk": 25,
+        "name": "Flicker",
+        "type": "dodge",
+        "description": "Your character flickers in place, and attacks seem to go through you",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Hacker",
+        "enhancements": [
+            {
+                "name": "Virus",
+                "effect": "anti_attack",
+                "value": 1,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 26,
+        "name": "Flip Bit",
+        "type": "block",
+        "description": "You alter the trajectory of an attack to deflect it",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Hacker",
+        "enhancements": []
+    },
+    {
+        "pk": 27,
+        "name": "Hack",
+        "type": "attack",
+        "description": "You hack your opponent\u2019s character, causing them to hurt themselves",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Hacker",
+        "enhancements": []
+    },
+    {
+        "pk": 28,
+        "name": "DDOS",
+        "type": "disrupt",
+        "description": "You ping your opponent so hard that he lags out",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Hacker",
+        "enhancements": [
+            {
+                "name": "Lag Out",
+                "effect": "attack_beats_dodge",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 29,
+        "name": "Remove World Chunk",
+        "type": "area",
+        "description": "You remove the chunk of world beneath your opponent, dropping them below the map",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Hacker",
+        "enhancements": []
+    },
+    {
+        "pk": 30,
+        "name": "Get Down!",
+        "type": "dodge",
+        "description": "Your nanites shove you out of the way of danger",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Architect",
+        "enhancements": []
+    },
+    {
+        "pk": 31,
+        "name": "Robot Phalanx",
+        "type": "block",
+        "description": "Your nanites form a shield in front of you, blocking attacks",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Architect",
+        "enhancements": [
+            {
+                "name": "Absorbing Phalanx",
+                "effect": "absorb",
+                "value": 0,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 32,
+        "name": "Spike Thrust",
+        "type": "attack",
+        "description": "Your nanite ball forms a number of sharp spines and thrusts them at the enemy",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Architect",
+        "enhancements": []
+    },
+    {
+        "pk": 33,
+        "name": "Screech",
+        "type": "disrupt",
+        "description": "Your nanites emit a high pitched screech, breaking concentration",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Architect",
+        "enhancements": []
+    },
+    {
+        "pk": 34,
+        "name": "Swarm",
+        "type": "area",
+        "description": "Your nanites swarm the area around your opponent",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Architect",
+        "enhancements": [
+            {
+                "name": "Absorbing Swarm",
+                "effect": "absorb",
+                "value": 0,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 35,
+        "name": "Light Bridge",
+        "type": "dodge",
+        "description": "You create a light bridge to an untargeted area",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Photonic",
+        "enhancements": []
+    },
+    {
+        "pk": 36,
+        "name": "Light Barrier",
+        "type": "block",
+        "description": "A luminescent barrier appears between you and your opponent",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Photonic",
+        "enhancements": [
+            {
+                "name": "Enhancing Barrier",
+                "effect": "buff_attack",
+                "value": 1,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "pk": 37,
+        "name": "Solid Light",
+        "type": "attack",
+        "description": "You point at your opponent and shoot a 2D plane of light through them",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Photonic",
+        "enhancements": [
+            {
+                "name": "Connected Beam",
+                "effect": "disable_disrupt",
+                "value": 1,
+                "target": "target"
+            }
+        ]
+    },
+    {
+        "pk": 38,
+        "name": "Laser Light Show",
+        "type": "disrupt",
+        "description": "You dazzle your opponent with lasers, causing them to lose focus",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Photonic",
+        "enhancements": []
+    },
+    {
+        "pk": 39,
+        "name": "Shatter",
+        "type": "area",
+        "description": "An amplified light zone around your opponent explodes into razor shards",
+        "effects": [
+            {
+                "effect": "damage",
+                "value": 100,
+                "target": "target"
+            }
+        ],
+        "class": "Photonic",
+        "enhancements": []
+    }
+]
