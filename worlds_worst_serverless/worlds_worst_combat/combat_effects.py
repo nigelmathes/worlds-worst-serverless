@@ -63,9 +63,7 @@ def inflict_prone(value: int, player: Player) -> Player:
 
     :return: Updated Player
     """
-    status_effects = list(map(str.strip, json.loads(player.status_effects)))
-    status_effects.append(['prone', value])
-    player.status_effects = str(status_effects)
+    player.status_effects.append(['prone', value])
 
     return player
 
@@ -115,9 +113,7 @@ def inflict_disorient(value: int, player: Player) -> Player:
 
     :return: Updated Player
     """
-    status_effects = list(map(str.strip, json.loads(player.status_effects)))
-    status_effects.append(['disorient', value])
-    player.status_effects = str(status_effects)
+    player.status_effects.append(['disorient', value])
 
     return player
 
@@ -167,9 +163,7 @@ def inflict_haste(value: int, player: Player) -> Player:
 
     :return: Updated player class
     """
-    status_effects = list(map(str.strip, json.loads(player.status_effects)))
-    status_effects.append(['haste', value])
-    player.status_effects = str(status_effects)
+    player.status_effects.append(['haste', value])
 
     return player
 
@@ -220,9 +214,7 @@ def inflict_delayed_double_damage(value: int, player: Player) -> Player:
 
     :return: Updated player class
     """
-    status_effects = list(map(str.strip, json.loads(player.status_effects)))
-    status_effects.append(['delayed_double_damage', value])
-    player.status_effects = str(status_effects)
+    player.status_effects.append(['delayed_double_damage', value])
 
     return player
 
@@ -255,9 +247,7 @@ def inflict_poison(value: int, player: Player) -> Player:
 
     :return: Updated player class
     """
-    status_effects = list(map(str.strip, json.loads(player.status_effects)))
-    status_effects.append(['poison', value])
-    player.status_effects = str(status_effects)
+    player.status_effects.append(['poison', value])
 
     return player
 

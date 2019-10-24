@@ -12,7 +12,6 @@ from typing import Dict, Any
 from .combat_utilities import calculate_winner, check_dead, apply_status, \
     find_ability, apply_ability_effects, apply_enhancements
 
-
 LambdaDict = Dict[str, Any]
 
 
@@ -27,7 +26,7 @@ class Player:
     max_ex: int
     hit_points: int
     ex: int
-    status_effects: str
+    status_effects: list
     attack: str
     enhanced: bool
 
@@ -42,8 +41,8 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     """
     # Decode the request
     request_body = event.get('body')
-    left_player = Player(**request_body['player1'])
-    right_player = Player(**request_body['player2'])
+    left_player = Player(**request_body['Player1'])
+    right_player = Player(**request_body['Player2'])
 
     # Read in the abilities data
     path_to_file = Path(__file__).parent / 'abilities.json'
@@ -97,9 +96,10 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                               self=left_player)
 
         # If enhanced, apply the enhancements
-        apply_enhancements(ability=ability_to_use,
-                           target=right_player,
-                           self=left_player)
+        if left_player.enhanced is True:
+            apply_enhancements(ability=ability_to_use,
+                               target=right_player,
+                               self=left_player)
 
     elif outcome == 'right_wins':
         # Update EX meters
@@ -117,9 +117,10 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                               self=right_player)
 
         # If enhanced, apply the enhancements
-        apply_enhancements(ability=ability_to_use,
-                           target=left_player,
-                           self=right_player)
+        if right_player.enhanced is True:
+            apply_enhancements(ability=ability_to_use,
+                               target=left_player,
+                               self=right_player)
     else:
         # Update EX meters
         left_player.ex += 150
@@ -127,11 +128,11 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
         # Find both abilities to use
         left_ability = find_ability(abilities,
-                                     left_player.character_class,
-                                     left_player.attack)
+                                    left_player.character_class,
+                                    left_player.attack)
         right_ability = find_ability(abilities,
-                                      right_player.character_class,
-                                      right_player.attack)
+                                     right_player.character_class,
+                                     right_player.attack)
 
         # Apply the effects, with left getting priority
         apply_ability_effects(ability=left_ability,
@@ -142,12 +143,14 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                               self=right_player)
 
         # If enhanced, apply the enhancements, with left getting priority
-        apply_enhancements(ability=left_ability,
-                           target=right_player,
-                           self=left_player)
-        apply_enhancements(ability=right_ability,
-                           target=left_player,
-                           self=right_player)
+        if left_player.enhanced is True:
+            apply_enhancements(ability=left_ability,
+                               target=right_player,
+                               self=left_player)
+        if right_player.enhanced is True:
+            apply_enhancements(ability=right_ability,
+                               target=left_player,
+                               self=right_player)
 
     # Return the combat results
     combat_results = {'Player1': asdict(left_player),

@@ -1,6 +1,7 @@
 """
 Holds all combat logic
 """
+import copy
 import json
 from typing import Tuple, Any
 
@@ -58,40 +59,36 @@ def apply_status(player1: Player, player2: Player, rules: dict) -> Tuple[Player,
     :return: Updated player1 and player2
     """
     if player1.status_effects:
-        status_effects = json.loads(player1.status_effects)
-        for status_effect in status_effects:
+        status_effects = copy.copy(player1.status_effects)
+        for i, status_effect in enumerate(status_effects):
             # Apply the status effect
             player1, rules = getattr(combat_effects,
-                                     'apply_' + status_effect['name'])(player=player1,
-                                                                       rules=rules,
-                                                                       left=True)
+                                     'apply_' + status_effect[0])(player=player1,
+                                                                  rules=rules,
+                                                                  left=True)
 
             # Decrease the duration of this status effect
-            status_effects[status_effect]['value'] -= 1
+            status_effect[1] -= 1
 
             # Remove status effect if duration is 0
-            if status_effects[status_effect]['value'] == 0:
-                del status_effects[status_effect]
-
-        player1.status_effects = str(status_effects)
+            if status_effect[1] == 0:
+                del player1.status_effects[i]
 
     if player2.status_effects:
-        status_effects = json.loads(player2.status_effects)
-        for status_effect in status_effects:
+        status_effects = copy.copy(player2.status_effects)
+        for i, status_effect in enumerate(status_effects):
             # Apply the status effect
             player2, rules = getattr(combat_effects,
-                                     'apply_' + status_effect['name'])(player=player2,
-                                                                       rules=rules,
-                                                                       left=False)
+                                     'apply_' + status_effect[0])(player=player2,
+                                                                  rules=rules,
+                                                                  left=True)
 
             # Decrease the duration of this status effect
-            status_effects[status_effect]['value'] -= 1
+            status_effect[1] -= 1
 
             # Remove status effect if duration is 0
-            if status_effects[status_effect]['value'] == 0:
-                del status_effects[status_effect]
-
-        player2.status_effects = str(status_effects)
+            if status_effect[1] == 0:
+                del player2.status_effects[i]
 
     return player1, player2, rules
 
@@ -145,7 +142,6 @@ def apply_enhancements(ability: dict, target: Player, self: Player) -> \
     :param target: Target, as in enemy. The one being damaged, if damage is done
     :param self: Self, as in the user of the ability.
     """
-    print(ability)
     for enhancement in ability['enhancements']:
         if enhancement['target'] == 'target':
             getattr(combat_effects, 'inflict_' + enhancement['effect'])(
