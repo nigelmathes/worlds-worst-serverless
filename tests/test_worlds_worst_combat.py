@@ -1,8 +1,10 @@
+import copy
 import json
 import pytest
 from pathlib import Path
 
 from worlds_worst_serverless.worlds_worst_combat.handler import do_combat
+from worlds_worst_serverless.worlds_worst_combat import combat_effects
 
 
 @pytest.fixture
@@ -193,7 +195,7 @@ def test_multiple_status(mock_event: dict) -> None:
 
     # Assert Actual == Expected
     assert combat_result_1['body']['Player1']['status_effects'] == [['disorient', 4],
-                                                                  ['poison', 11]]
+                                                                    ['poison', 11]]
     assert combat_result_1['body']['Player2']['status_effects'] == [['prone', 1]]
 
     # Act - Do it again! Player1 re-applies prone
@@ -214,3 +216,44 @@ def test_multiple_status(mock_event: dict) -> None:
     assert combat_result_3['body']['Player1']['status_effects'] == [['disorient', 2],
                                                                     ['poison', 9]]
     assert combat_result_3['body']['Player2']['status_effects'] == []
+
+
+@pytest.mark.parametrize("status_effect,expected_diff,left",
+                         [
+                             ("apply_prone", "area", False),
+                             ("apply_prone", "block", True),
+                             ("apply_disorient", "attack", False),
+                             ("apply_disorient", "dodge", True),
+                             ("apply_haste", "attack", False),
+                             ("apply_haste", "attack", True)
+                         ])
+def test_rules_change(mock_event: dict, status_effect: str, expected_diff: str,
+                      left: bool) -> None:
+    """
+    Test to check if the rules change properly
+
+    :param mock_event: Mock AWS lambda event dict
+    :param status_effect: The applied status effect which changes the rules
+    :param expected_diff: Expected change from default rules
+    """
+    default_rules = {"area": {"beats": ["disrupt", "dodge"],
+                              "loses": ["attack", "block"]},
+                     "attack": {"beats": ["disrupt", "area"],
+                                "loses": ["block", "dodge"]},
+                     "block": {"beats": ["area", "attack"],
+                               "loses": ["disrupt", "dodge"]},
+                     "disrupt": {"beats": ["block", "dodge"],
+                                 "loses": ["attack", "area"]},
+                     "dodge": {"beats": ["attack", "block"],
+                               "loses": ["area", "disrupt"]}}
+
+    _, new_rules = getattr(combat_effects,
+                           status_effect)(player=player1,
+                                          rules=copy.deepcopy(default_rules),
+                                          left=left)
+    different_rules = None
+    for key in default_rules:
+        if new_rules[key] != default_rules[key]:
+            different_rules = key
+
+    assert different_rules == expected_diff

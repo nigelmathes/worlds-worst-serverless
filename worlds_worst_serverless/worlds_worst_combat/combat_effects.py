@@ -4,7 +4,6 @@ Holds all combat effects logic
 Inflict is to cause an affliction and add a status effect
 Apply is to do something right away
 """
-import json
 from typing import Tuple, Any
 
 Player = Any

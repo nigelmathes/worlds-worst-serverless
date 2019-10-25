@@ -2,7 +2,6 @@
 Holds all combat logic
 """
 import copy
-import json
 from typing import Tuple, Any
 
 from . import combat_effects
