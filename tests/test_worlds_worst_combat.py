@@ -220,12 +220,30 @@ def test_multiple_status(mock_event: dict) -> None:
 
 @pytest.mark.parametrize("status_effect,expected_diff,left",
                          [
-                             ("apply_prone", "area", False),
-                             ("apply_prone", "block", True),
-                             ("apply_disorient", "attack", False),
-                             ("apply_disorient", "dodge", True),
-                             ("apply_haste", "attack", False),
-                             ("apply_haste", "attack", True)
+                             ("apply_prone", ["area"], False),
+                             ("apply_prone", ["block"], True),
+                             ("apply_disorient", ["attack"], False),
+                             ("apply_disorient", ["dodge"], True),
+                             ("apply_haste", ["attack"], False),
+                             ("apply_haste", ["attack"], True),
+                             ("apply_counter_attack", ["attack"], False),
+                             ("apply_counter_attack", ["area"], True),
+                             ("apply_counter_disrupt", ["disrupt"], False),
+                             ("apply_counter_disrupt", ["block"], True),
+                             ("apply_pistol", ["attack", "area", "block", 
+                                               "disrupt", "dodge"], False),
+                             ("apply_pistol", ["attack"], True),
+                             ("apply_shotgun", ["area", "block",
+                                                "disrupt", "dodge"], False),
+                             ("apply_shotgun", ["attack"], True),
+                             ("apply_rocket_launcher", ["attack", "area",
+                                                        "disrupt", "dodge"], False),
+                             ("apply_rocket_launcher", ["attack"], True),
+                             ("apply_connected", ["attack", "area", "block",
+                                                  "dodge"], False),
+                             ("apply_connected", ["disrupt"], True),
+                             ("apply_lag", ["dodge"], False),
+                             ("apply_lag", ["attack"], True)                             
                          ])
 def test_rules_change(mock_event: dict, status_effect: str, expected_diff: str,
                       left: bool) -> None:
@@ -251,9 +269,9 @@ def test_rules_change(mock_event: dict, status_effect: str, expected_diff: str,
                            status_effect)(player=player1,
                                           rules=copy.deepcopy(default_rules),
                                           left=left)
-    different_rules = None
+    different_rules = list()
     for key in default_rules:
         if new_rules[key] != default_rules[key]:
-            different_rules = key
+            different_rules.append(key)
 
-    assert different_rules == expected_diff
+    assert set(different_rules) == set(expected_diff)

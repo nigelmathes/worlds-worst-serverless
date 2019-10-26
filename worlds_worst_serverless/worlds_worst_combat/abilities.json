@@ -463,6 +463,12 @@
                 "effect": "anti_attack",
                 "value": 1,
                 "target": "target"
+            },
+            {
+                "name": "Virus",
+                "effect": "anti_area",
+                "value": 1,
+                "target": "target"
             }
         ]
     },
@@ -565,7 +571,7 @@
             {
                 "name": "Absorbing Phalanx",
                 "effect": "absorb",
-                "value": 0,
+                "value": 1,
                 "target": "self"
             }
         ]
@@ -617,7 +623,7 @@
             {
                 "name": "Absorbing Swarm",
                 "effect": "absorb",
-                "value": 0,
+                "value": 1,
                 "target": "self"
             }
         ]
