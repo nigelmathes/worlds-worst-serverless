@@ -4,8 +4,10 @@ Holds all combat logic
 import copy
 from typing import Tuple, Any
 
-from . import combat_effects
-
+try:
+    import combat_effects
+except ImportError:
+    from . import combat_effects
 Player = Any
 
 

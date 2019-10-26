@@ -1,4 +1,4 @@
-service: worlds_worst_combat
+service: worlds-worst-combat
 
 provider:
   name: aws
@@ -6,7 +6,7 @@ provider:
   runtime: python3.7
 
 functions:
-  infer:
+  do_combat:
     handler: handler.do_combat
     timeout: 30
     events:

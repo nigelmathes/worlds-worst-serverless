@@ -9,8 +9,12 @@ from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Dict, Any
 
-from .combat_utilities import calculate_winner, check_dead, apply_status, \
-    find_ability, apply_ability_effects, apply_enhancements
+try:
+    from combat_utilities import calculate_winner, check_dead, apply_status, \
+        find_ability, apply_ability_effects, apply_enhancements
+except ImportError:
+    from .combat_utilities import calculate_winner, check_dead, apply_status, \
+        find_ability, apply_ability_effects, apply_enhancements
 
 LambdaDict = Dict[str, Any]
 
@@ -159,7 +163,5 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         'statusCode': 200,
         'body': combat_results
     }
-    with open("sample_data.json", 'w') as fout:
-        json.dump(result, fout, indent=4)
 
     return result
