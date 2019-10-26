@@ -276,7 +276,6 @@ def apply_counter_disrupt(player: Player, rules: dict, left: bool) ->\
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-# TODO: Test all random effects
 def inflict_random_gun(value: int, player: Player) -> Player:
     """
     A gun materializes in your hands.

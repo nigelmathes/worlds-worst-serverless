@@ -159,4 +159,7 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         'statusCode': 200,
         'body': combat_results
     }
+    with open("sample_data.json", 'w') as fout:
+        json.dump(result, fout, indent=4)
+
     return result

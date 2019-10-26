@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "worlds_worst_serverless"
+name = "worlds-worst-serverless"
 version = "0.1.0"
 description = "The world's worst serverless architecture"
 authors = ["TruckThunders <nigelmathes@gmail.com>"]

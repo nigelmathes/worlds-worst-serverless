@@ -218,6 +218,28 @@ def test_multiple_status(mock_event: dict) -> None:
     assert combat_result_3['body']['Player2']['status_effects'] == []
 
 
+def test_random_gun(mock_event: dict) -> None:
+    """
+    Test to make sure the random gun chooses randomly
+    
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event['body']['Player1']['character_class'] = 'Creator'
+    mock_event['body']['Player1']['attack'] = 'attack'
+    mock_event['body']['Player1']['enhanced'] = True
+    mock_event['body']['Player2']['attack'] = 'disrupt'
+    possible_status = ['pistol', 'rifle', 'shotgun', 'rocket_launcher']
+    
+    # Act
+    combat_result = do_combat(mock_event, mock_event)
+    
+    # Assert
+    assert combat_result['body']['Player1']['status_effects'][0][0] in possible_status
+    assert combat_result['body']['Player1']['status_effects'][0][1] == 1
+    assert len(combat_result['body']['Player2']['status_effects']) == 2
+
+
 @pytest.mark.parametrize("status_effect,expected_diff,left",
                          [
                              ("apply_prone", ["area"], False),
