@@ -518,7 +518,7 @@
         "enhancements": [
             {
                 "name": "Lag Out",
-                "effect": "attack_beats_dodge",
+                "effect": "lag",
                 "value": 1,
                 "target": "self"
             }
@@ -681,7 +681,7 @@
         "enhancements": [
             {
                 "name": "Connected Beam",
-                "effect": "disable_disrupt",
+                "effect": "connected",
                 "value": 1,
                 "target": "target"
             }

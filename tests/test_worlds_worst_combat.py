@@ -148,34 +148,6 @@ def test_check_dead(mock_event: dict) -> None:
     assert combat_result == mock_event
 
 
-@pytest.mark.parametrize("ability_combo,expected_status",
-                         [(["disrupt", "block"], [['prone', 1]]),
-                          (["area", "disrupt"], [['disorient', 1]])])
-def test_enhancements(mock_event: dict, ability_combo: list, expected_status: list) \
-        -> None:
-    """
-    Test that a enhancements are applied properly
-
-    :param mock_event: Mock AWS lambda event dict
-    """
-    # Arrange
-    mock_event['body']['Player1']['enhanced'] = True
-    mock_event['body']['Player1']['attack'] = ability_combo[0]
-    mock_event['body']['Player2']['attack'] = ability_combo[1]
-
-    expected_player1_hp = mock_event['body']['Player1']['hit_points']
-    expected_player2_hp = mock_event['body']['Player2']['hit_points'] - 100
-
-    # Act
-    # Perform a round of combat
-    combat_result = do_combat(mock_event, mock_event)
-
-    # Assert
-    assert combat_result['body']['Player1']['hit_points'] == expected_player1_hp
-    assert combat_result['body']['Player2']['hit_points'] == expected_player2_hp
-    assert combat_result['body']['Player2']['status_effects'] == expected_status
-
-
 def test_multiple_status(mock_event: dict) -> None:
     """
     Test that status effects get correctly applied/updated when there are multiple
@@ -237,8 +209,54 @@ def test_random_gun(mock_event: dict) -> None:
     # Assert
     assert combat_result['body']['Player1']['status_effects'][0][0] in possible_status
     assert combat_result['body']['Player1']['status_effects'][0][1] == 1
-    assert len(combat_result['body']['Player2']['status_effects']) == 2
+    assert len(combat_result['body']['Player1']['status_effects']) == 1
 
+
+@pytest.mark.parametrize("character_class,ability_combo,expected_status",
+                         [("Dreamer", ["disrupt", "block"], [['prone', 1]]),
+                          ("Dreamer", ["area", "disrupt"], [['disorient', 1]]),
+                          ("Chosen", ["dodge", "attack"], [['haste', 1]]),
+                          ("Chemist", ["attack", "disrupt"], [['poison', 2]]),
+                          ("Cloistered", ["dodge", "attack"], [['counter_attack', 1]]),
+                          ("Cloistered", ["block", "area"], [['counter_disrupt', 1]]),
+                          ("Hacker", ["dodge", "attack"], [['anti_attack', 1], ['anti_area', 1]]),
+                          ("Hacker", ["disrupt", "block"], [['lag', 1]]),
+                          ("Architect", ["block", "attack"], [['absorb', 1]]),
+                          ("Architect", ["area", "dodge"], [['absorb', 1]]),
+                          ("Photonic", ["block", "area"], [['buff_attack', 1]]),
+                          ("Photonic", ["attack", "disrupt"], [['connected', 1]])])
+def test_enhancements(mock_event: dict, abilities: dict, character_class: str,
+                      ability_combo: list, expected_status: list) -> None:
+    """
+    Test that a enhancements are applied properly
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event['body']['Player1']['character_class'] = character_class
+    mock_event['body']['Player1']['enhanced'] = True
+    mock_event['body']['Player1']['attack'] = ability_combo[0]
+    mock_event['body']['Player2']['attack'] = ability_combo[1]
+
+    player1_action = [x for x in abilities if x['class'] == character_class and 
+                      x['type'] == ability_combo[0]]
+    expected_target = player1_action[0]['enhancements'][0]['target']
+
+    expected_player1_hp = mock_event['body']['Player1']['hit_points']
+    expected_player2_hp = mock_event['body']['Player2']['hit_points'] - 100
+
+    # Act
+    # Perform a round of combat
+    combat_result = do_combat(mock_event, mock_event)
+
+    # Assert
+    assert combat_result['body']['Player1']['hit_points'] == expected_player1_hp
+    assert combat_result['body']['Player2']['hit_points'] == expected_player2_hp
+    if expected_target == 'target':
+        assert combat_result['body']['Player2']['status_effects'] == expected_status
+    else:
+        assert combat_result['body']['Player1']['status_effects'] == expected_status
+    
 
 @pytest.mark.parametrize("status_effect,expected_diff,left",
                          [

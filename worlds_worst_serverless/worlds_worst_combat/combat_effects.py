@@ -396,7 +396,7 @@ def inflict_anti_attack(value: int, player: Player) -> Player:
     Your character flickers in place, and attacks seem to go through you
     Next turn, take damage if player uses attack
     """
-    player.status_effects.append(['anti_attack_area', value])
+    player.status_effects.append(['anti_attack', value])
 
     return player
 
@@ -420,7 +420,7 @@ def inflict_anti_area(value: int, player: Player) -> Player:
     Your character flickers in place, and attacks seem to go through you
     Next turn, take damage if player uses area
     """
-    player.status_effects.append(['anti_attack_area', value])
+    player.status_effects.append(['anti_area', value])
 
     return player
 
@@ -525,7 +525,7 @@ def inflict_connected(value: int, player: Player) -> Player:
     """
     Next turn, disrupt always clashes
     """
-    player.status_effects.append(['counter_disrupt', value])
+    player.status_effects.append(['connected', value])
 
     return player
 
