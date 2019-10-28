@@ -37,7 +37,7 @@ class Player:
 
 def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     """
-    Function do do some machine learning
+    Function do combat
 
     :param event: Input AWS Lambda event dict
     :param context: Input AWS Lambda context dict
@@ -45,6 +45,8 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     """
     # Decode the request
     request_body = event.get('body')
+    if type(request_body) == str:
+        request_body = json.loads(request_body)
     left_player = Player(**request_body['Player1'])
     right_player = Player(**request_body['Player2'])
 
@@ -70,11 +72,12 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     # Check if anyone died from added effects
     if check_dead(left_player.hit_points, right_player.hit_points):
         # If dead, return the combat results immediately, do not do combat
-        combat_results = {'Player1': asdict(left_player),
-                          'Player2': asdict(right_player)}
+        combat_results = json.dumps({'Player1': asdict(left_player),
+                                     'Player2': asdict(right_player)})
         result = {
             'statusCode': 200,
-            'body': combat_results
+            'body': combat_results,
+            'headers': {'Access-Control-Allow-Origin': '*'}
         }
         return result
 
@@ -157,11 +160,12 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                                self=right_player)
 
     # Return the combat results
-    combat_results = {'Player1': asdict(left_player),
-                      'Player2': asdict(right_player)}
+    combat_results = json.dumps({'Player1': asdict(left_player),
+                                 'Player2': asdict(right_player)})
     result = {
         'statusCode': 200,
-        'body': combat_results
+        'body': combat_results,
+        'headers': {'Access-Control-Allow-Origin': '*'}
     }
 
     return result

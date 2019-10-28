@@ -4,6 +4,17 @@ provider:
   name: aws
   region: us-east-1
   runtime: python3.7
+  iamRoleStatements: # permissions for all of your functions can be set here
+    - Effect: Allow
+      Action: # Gives permission to Lambda Invoke
+        - lambda:InvokeFunction
+      Resource: "*"
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+    slim: true
 
 functions:
   do_combat:
@@ -13,6 +24,7 @@ functions:
       - http:
           path: combat
           method: post
+          cors: true
 
 package:
   exclude:
