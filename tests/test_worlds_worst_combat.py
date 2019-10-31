@@ -44,7 +44,10 @@ def abilities() -> dict:
     :return: The abilities dict
     """
     # Read in the abilities data
-    path_to_file = Path.cwd() / 'abilities.json'
+    path_to_file = Path(__file__).resolve().parents[1] / \
+                   'worlds_worst_serverless' / \
+                   'worlds_worst_combat' / \
+                   'abilities.json'
     with path_to_file.open() as json_file:
         abilities = json.load(json_file)
 
