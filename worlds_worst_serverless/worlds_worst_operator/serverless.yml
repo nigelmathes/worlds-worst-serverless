@@ -1,0 +1,44 @@
+service: worlds-worst-operator
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.7
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+
+functions:
+  infer:
+    handler: handler.route_tasks_and_response
+    timeout: 30
+    events:
+      - http:
+          path: find
+          method: post
+
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+    slim: true
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+
+resources: # CloudFormation template syntax from here on.
+  Resources:
+    playersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: playerId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: playerId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

@@ -20,10 +20,10 @@ def find_interesting_things(event: LambdaDict, context: LambdaDict) -> LambdaDic
     :return: Output AWS Lambda dict
     """
     # Decode the request
-    request_body = event.get('body')
-    center_lat = float(request_body['lat'])
-    center_lon = float(request_body['lon'])
-    search_radius = float(request_body['distance'])
+    request_body = event.get("body")
+    center_lat = float(request_body["lat"])
+    center_lon = float(request_body["lon"])
+    search_radius = float(request_body["distance"])
 
     # Make bounding box (south, west, north, east)
     # Latitude: 1 deg = 110.574 km
@@ -51,34 +51,27 @@ def find_interesting_things(event: LambdaDict, context: LambdaDict) -> LambdaDic
     data = response.json()
 
     # Parse out interesting amenities
-    bad_amenities = [
-        'parking',
-        'toilets',
-        'shelter'
-    ]
+    bad_amenities = ["parking", "toilets", "shelter"]
     interesting_things = dict()
-    for element in data['elements']:
-        if element['tags']['amenity'] not in bad_amenities:
+    for element in data["elements"]:
+        if element["tags"]["amenity"] not in bad_amenities:
             # Try catches for dict elements
             # If NO NAME or NO AMENITY TYPE appears, probably blacklist in bad_amenities
             try:
-                name = element['tags']['name']
+                name = element["tags"]["name"]
             except KeyError:
                 continue
             try:
-                amenity_type = element['tags']['amenity']
+                amenity_type = element["tags"]["amenity"]
             except KeyError:
                 continue
 
             # Add entry to return dictionary
-            interesting_things.update(
-                {
-                    name: amenity_type
-                }
-            )
+            interesting_things.update({name: amenity_type})
 
     result = {
-        'statusCode': 200,
-        'body': interesting_things
+        "statusCode": 200,
+        "body": interesting_things,
+        "headers": {"Access-Control-Allow-Origin": "*"},
     }
     return result

@@ -23,9 +23,9 @@ def calculate_winner(rules: dict, left_attack: str, right_attack: str) -> str:
     """
     priority_rules = rules[left_attack]
 
-    if right_attack in priority_rules['beats']:
+    if right_attack in priority_rules["beats"]:
         return "left_wins"
-    elif right_attack in priority_rules['loses']:
+    elif right_attack in priority_rules["loses"]:
         return "right_wins"
     else:
         return "draw"
@@ -47,9 +47,9 @@ def check_dead(left_hp: int, right_hp: int) -> bool:
         return False
 
 
-def apply_status(player1: Player, player2: Player, rules: dict) -> Tuple[Player,
-                                                                         Player,
-                                                                         dict]:
+def apply_status(
+    player1: Player, player2: Player, rules: dict
+) -> Tuple[Player, Player, dict]:
     """
     Method to apply status effects before combat begins
 
@@ -63,10 +63,9 @@ def apply_status(player1: Player, player2: Player, rules: dict) -> Tuple[Player,
         status_effects = copy.copy(player1.status_effects)
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
-            player1, rules = getattr(combat_effects,
-                                     'apply_' + status_effect[0])(player=player1,
-                                                                  rules=rules,
-                                                                  left=True)
+            player1, rules = getattr(combat_effects, "apply_" + status_effect[0])(
+                player=player1, rules=rules, left=True
+            )
 
             # Decrease the duration of this status effect
             status_effect[1] -= 1
@@ -79,10 +78,9 @@ def apply_status(player1: Player, player2: Player, rules: dict) -> Tuple[Player,
         status_effects = copy.copy(player2.status_effects)
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
-            player2, rules = getattr(combat_effects,
-                                     'apply_' + status_effect[0])(player=player2,
-                                                                  rules=rules,
-                                                                  left=True)
+            player2, rules = getattr(combat_effects, "apply_" + status_effect[0])(
+                player=player2, rules=rules, left=True
+            )
 
             # Decrease the duration of this status effect
             status_effect[1] -= 1
@@ -104,18 +102,16 @@ def find_ability(abilities: list, character_class: str, attack_type: str):
     :return: Ability dict entry
     """
     # Find the ability to use
-    ability_to_use = {'effects': [], 'enhancements': []}
+    ability_to_use = {"effects": [], "enhancements": []}
     for ability in abilities:
-        if (ability['class'] == character_class) \
-                and (ability['type'] == attack_type):
+        if (ability["class"] == character_class) and (ability["type"] == attack_type):
             ability_to_use = ability
             break
 
     return ability_to_use
 
 
-def apply_ability_effects(ability: dict, target: Player, self: Player) -> \
-        None:
+def apply_ability_effects(ability: dict, target: Player, self: Player) -> None:
     """
     Apply the effects of the given ability
 
@@ -123,19 +119,18 @@ def apply_ability_effects(ability: dict, target: Player, self: Player) -> \
     :param target: Target, as in enemy. The one being damaged, if damage is done
     :param self: Self, as in the user of the ability.
     """
-    for effect in ability['effects']:
-        if effect['target'] == 'target':
-            getattr(combat_effects, 'inflict_' + effect['effect'])(
-                value=effect['value'],
-                player=target)
-        elif effect['target'] == 'self':
-            getattr(combat_effects, 'inflict_' + effect['effect'])(
-                value=effect['value'],
-                player=self)
+    for effect in ability["effects"]:
+        if effect["target"] == "target":
+            getattr(combat_effects, "inflict_" + effect["effect"])(
+                value=effect["value"], player=target
+            )
+        elif effect["target"] == "self":
+            getattr(combat_effects, "inflict_" + effect["effect"])(
+                value=effect["value"], player=self
+            )
 
 
-def apply_enhancements(ability: dict, target: Player, self: Player) -> \
-        None:
+def apply_enhancements(ability: dict, target: Player, self: Player) -> None:
     """
     Apply the effects of the given ability's enhancements
 
@@ -143,12 +138,12 @@ def apply_enhancements(ability: dict, target: Player, self: Player) -> \
     :param target: Target, as in enemy. The one being damaged, if damage is done
     :param self: Self, as in the user of the ability.
     """
-    for enhancement in ability['enhancements']:
-        if enhancement['target'] == 'target':
-            getattr(combat_effects, 'inflict_' + enhancement['effect'])(
-                value=enhancement['value'],
-                player=target)
-        elif enhancement['target'] == 'self':
-            getattr(combat_effects, 'inflict_' + enhancement['effect'])(
-                value=enhancement['value'],
-                player=self)
+    for enhancement in ability["enhancements"]:
+        if enhancement["target"] == "target":
+            getattr(combat_effects, "inflict_" + enhancement["effect"])(
+                value=enhancement["value"], player=target
+            )
+        elif enhancement["target"] == "self":
+            getattr(combat_effects, "inflict_" + enhancement["effect"])(
+                value=enhancement["value"], player=self
+            )

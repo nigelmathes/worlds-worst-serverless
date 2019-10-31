@@ -38,7 +38,7 @@ def inflict_percent_damage(value: int, player: Player) -> Player:
     """
     Deal percent max health damage
     """
-    player.hit_points -= int(round((value / 100.) * player.max_hit_points))
+    player.hit_points -= int(round((value / 100.0) * player.max_hit_points))
 
     return player
 
@@ -58,7 +58,7 @@ def inflict_prone(value: int, player: Player) -> Player:
     Make the target prone.
     Next turn, block loses to area
     """
-    player.status_effects.append(['prone', value])
+    player.status_effects.append(["prone", value])
 
     return player
 
@@ -98,7 +98,7 @@ def inflict_disorient(value: int, player: Player) -> Player:
     Make the target disoriented by adding the status effect to the target's statuses
     Next turn, dodge loses to attack
     """
-    player.status_effects.append(['disorient', value])
+    player.status_effects.append(["disorient", value])
 
     return player
 
@@ -138,7 +138,7 @@ def inflict_haste(value: int, player: Player) -> Player:
     Make the target hasted.
     Next turn, target's attack will beat an opposing attack (no clash)
     """
-    player.status_effects.append(['haste', value])
+    player.status_effects.append(["haste", value])
 
     return player
 
@@ -178,7 +178,7 @@ def inflict_poison(value: int, player: Player) -> Player:
     Make the target take damage for value rounds by
     adding the status effect to the target's statuses
     """
-    player.status_effects.append(['poison', value])
+    player.status_effects.append(["poison", value])
 
     return player
 
@@ -200,13 +200,15 @@ def inflict_counter_attack(value: int, player: Player) -> Player:
     Gain the high ground.
     Next turn, your area beats attack
     """
-    player.status_effects.append(['counter_attack', value])
+    player.status_effects.append(["counter_attack", value])
 
     return player
 
 
 # Enhanced effect of Cloistered's High Ground
-def apply_counter_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_counter_attack(
+    player: Player, rules: dict, left: bool
+) -> Tuple[Player, dict]:
     """
     Apply the effects of counter_attack:
     area beats attack
@@ -240,14 +242,15 @@ def inflict_counter_disrupt(value: int, player: Player) -> Player:
     Expand your defense.
     Next turn, block beats disrupt
     """
-    player.status_effects.append(['counter_disrupt', value])
+    player.status_effects.append(["counter_disrupt", value])
 
     return player
 
 
 # Enhanced effect of Cloistered's Broad Deflection
-def apply_counter_disrupt(player: Player, rules: dict, left: bool) ->\
-        Tuple[Player, dict]:
+def apply_counter_disrupt(
+    player: Player, rules: dict, left: bool
+) -> Tuple[Player, dict]:
     """
     Apply the effects of counter_disrupt:
     block beats disrupt
@@ -286,7 +289,7 @@ def inflict_random_gun(value: int, player: Player) -> Player:
         3) Rocket Launcher - Attack is now area
 
     """
-    possible_status = ['pistol', 'rifle', 'shotgun', 'rocket_launcher']
+    possible_status = ["pistol", "rifle", "shotgun", "rocket_launcher"]
     player.status_effects.append([possible_status[randrange(4)], value])
 
     return player
@@ -361,8 +364,9 @@ def apply_shotgun(player: Player, rules: dict, left: bool) -> Tuple[Player, dict
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
 # TODO: Test all random effects
-def apply_rocket_launcher(player: Player, rules: dict, left: bool) ->\
-        Tuple[Player, dict]:
+def apply_rocket_launcher(
+    player: Player, rules: dict, left: bool
+) -> Tuple[Player, dict]:
     """
     Apply the effects of rocket_launcher:
     attack is now area
@@ -396,7 +400,7 @@ def inflict_anti_attack(value: int, player: Player) -> Player:
     Your character flickers in place, and attacks seem to go through you
     Next turn, take damage if player uses attack
     """
-    player.status_effects.append(['anti_attack', value])
+    player.status_effects.append(["anti_attack", value])
 
     return player
 
@@ -420,7 +424,7 @@ def inflict_anti_area(value: int, player: Player) -> Player:
     Your character flickers in place, and attacks seem to go through you
     Next turn, take damage if player uses area
     """
-    player.status_effects.append(['anti_area', value])
+    player.status_effects.append(["anti_area", value])
 
     return player
 
@@ -443,7 +447,7 @@ def inflict_lag(value: int, player: Player) -> Player:
     Make the target lag.
     Next turn, attack beats dodge
     """
-    player.status_effects.append(['lag', value])
+    player.status_effects.append(["lag", value])
 
     return player
 
@@ -482,7 +486,7 @@ def inflict_absorb(value: int, player: Player) -> Player:
     """
     Next turn, heal percent health damage you dealt
     """
-    player.status_effects.append(['absorb', value])
+    player.status_effects.append(["absorb", value])
 
     return player
 
@@ -503,7 +507,7 @@ def inflict_buff_attack(value: int, player: Player) -> Player:
     """
     Next turn, attack deals double damage.
     """
-    player.status_effects.append(['buff_attack', value])
+    player.status_effects.append(["buff_attack", value])
 
     return player
 
@@ -525,7 +529,7 @@ def inflict_connected(value: int, player: Player) -> Player:
     """
     Next turn, disrupt always clashes
     """
-    player.status_effects.append(['connected', value])
+    player.status_effects.append(["connected", value])
 
     return player
 
