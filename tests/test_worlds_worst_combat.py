@@ -18,7 +18,7 @@ def player1():
         "ex": 0,
         "status_effects": [],
         "attack": "attack",
-        "enhanced": "False",
+        "enhanced": False,
     }
 
 
@@ -33,7 +33,7 @@ def player2():
         "ex": 0,
         "status_effects": [],
         "attack": "area",
-        "enhanced": "False",
+        "enhanced": False,
     }
 
 

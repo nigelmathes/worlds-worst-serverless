@@ -5,16 +5,18 @@ except ImportError:
 
 import json
 import os
-from string import ascii_lowercase
-from dataclasses import dataclass, asdict
-import decimal
-from typing import Dict, Any
+import random
 
-import requests
+from string import ascii_lowercase
+from dataclasses import dataclass, asdict, fields
+import decimal
+from typing import Dict, Any, Tuple
 
 import boto3
 from botocore.exceptions import ClientError
+
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+lambda_client = boto3.client('lambda', region_name='us-east-1')
 
 LambdaDict = Dict[str, Any]
 
@@ -41,6 +43,7 @@ class DecimalEncoder(json.JSONEncoder):
     """
     This is a workaround for: http://bugs.python.org/issue16535
     """
+
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             if o % 1 > 0:
@@ -71,7 +74,17 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     player_table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
     # Verify the identity of the player
-    player_db = Player(**get_player_info(table=player_table, player_token=id_token))
+    player_query = get_player_info(table=player_table, player_token=id_token)
+    if 'player_data' in player_query:
+        player_db = Player(**player_query['player_data'])
+    else:
+        # Return a 401 error if the id does not match an id in the database
+        # User is not authorized
+        return {
+            "statusCode": 401,
+            "body": json.dumps({"Error": "Player does not exist in database"}),
+            "headers": {"Access-Control-Allow-Origin": "*"},
+        }
 
     # Return a 403 error if the submitted information does not match the player DB info
     # User has altered their player information and is not allowed to play
@@ -83,10 +96,11 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         }
 
     # If you get here, auth is good. Take action based on player ID token and action
-    # TODO: Make this do something besides dummy functionality
-    fields_to_update = dict()
-    updated_player = player
-    fields_to_update['hit_points'] = 400
+    # Give the player the input action
+    player.attack = action
+    player.enhanced = False
+
+    player, fields_to_update = do_combat(player)
 
     # Update player information if it needs updating
     if fields_to_update:
@@ -95,7 +109,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
 
     # Return the results
     action_results = json.dumps(
-        {"Player": asdict(updated_player), "response": None}
+        {"Player": asdict(player), "response": None}
     )
 
     result = {
@@ -104,6 +118,60 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         "headers": {"Access-Control-Allow-Origin": "*"},
     }
     return result
+
+
+def do_combat(player: Player) -> Tuple[Player, Dict]:
+    """
+    Function to do combat based on a Player
+
+    :param player: Dataclass holding player data
+    :return: Updated Player dataclass and dict of fields to update
+    """
+    # Create Opponent
+    possible_attacks = ["attack", "area", "block", "disrupt", "dodge"]
+    target = Player(
+        name="Test_Opponent",
+        character_class="Cloistered",
+        max_hit_points=500,
+        max_ex=1000,
+        hit_points=500,
+        ex=0,
+        status_effects=[],
+        attack=random.choice(possible_attacks),
+        enhanced=False
+    )
+
+    arn = 'arn:aws:lambda:us-east-1:437610822210:function:' \
+          'worlds-worst-combat-dev-do_combat:16'
+    data = {"body": {"Player1": asdict(player), "Player2": asdict(target)}}
+    payload = json.dumps(data)
+
+    response = lambda_client.invoke(FunctionName=arn,
+                                    InvocationType='RequestResponse',
+                                    Payload=payload)
+    # response of the form:
+    # {
+    #     "statusCode": 200,
+    #     "body": combat_results,
+    #     "headers": {"Access-Control-Allow-Origin": "*"},
+    # }
+    result = json.loads(json.loads(response.get('Payload').read())["body"])
+    updated_player = Player(**result["Player1"])
+    target = Player(**result["Player2"])
+
+    # Figure out if something happened and needs updating
+    fields_to_update = dict()
+    if player != updated_player:
+        print("Player updated!")
+        # Loop over player fields and output what needs updating as dict
+        for field in fields(player):
+            old_value = getattr(player, field.name)
+            new_value = getattr(updated_player, field.name)
+            if old_value != new_value:
+                print(f"{field.name} is different, updating to {new_value}")
+                fields_to_update[field.name] = new_value
+
+    return updated_player, fields_to_update
 
 
 def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
@@ -119,19 +187,22 @@ def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
     try:
         response = table.get_item(
             Key={
-                'playerId': player_token
+                'id': player_token
             }
         )
     except ClientError as e:
         return e.response['Error']['Message']
     else:
-        item = response['Item']
+        try:
+            item = response['Item']
 
-        # Remove the player ID from the response so it doesn't get passed around
-        del(item['playerId'])
+            # Remove the player ID from the response so it doesn't get passed around
+            del (item['id'])
 
-        print("Retrieved Player Info.")
-        return json.dumps(item, indent=4, cls=DecimalEncoder)
+            print("Retrieved Player Info.")
+            return json.loads(json.dumps(item, indent=4, cls=DecimalEncoder))
+        except KeyError:
+            return {"Error": "Queried player does not exist."}
 
 
 def update_player_info(table: dynamodb.Table, player_token: str,
@@ -143,7 +214,7 @@ def update_player_info(table: dynamodb.Table, player_token: str,
     :param player_token: Player ID token linking player to database entry
     :param update_map: Dictionary mapping player information to database entry info
 
-    :return:
+    :return: Response of DynamoDB table update
     """
     update_expression = "set "
     attribute_values = dict()
@@ -159,15 +230,16 @@ def update_player_info(table: dynamodb.Table, player_token: str,
     #     },
     for key, value in update_map.items():
         letter = next(alphabet)
-        update_expression = f"{key}.value = :{letter}, "
+        update_expression += f"player_data.{key} = :{letter}, "
         attribute_values[f":{letter}"] = value
 
+    update_expression = update_expression[:-2]
     print(f"Update Expression: {update_expression}")
     print(f"Attribute Values: {attribute_values}")
 
     response = table.update_item(
         Key={
-            'playerId': player_token
+            'id': player_token
         },
         UpdateExpression=update_expression,
         ExpressionAttributeValues=attribute_values
