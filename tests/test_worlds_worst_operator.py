@@ -82,7 +82,7 @@ def mock_event(player: dict) -> dict:
     return {
         "body": {
             "Player": player,
-            "id": "player_hash",
+            "playerId": "player_hash",
             "action": "attack"
         }
     }
@@ -104,14 +104,14 @@ def dynamodb_config(dynamodb: boto3.resource,
         TableName='Table',
         AttributeDefinitions=[
             {
-                'AttributeName': 'id',
+                'AttributeName': 'playerId',
                 'AttributeType': 'S'
             }
         ],
         KeySchema=[
             {
-                "AttributeName": "id",
-                "KeyType": "HASH"
+                "AttributeName": 'playerId',
+                "KeyType": 'HASH'
             }
         ],
         ProvisionedThroughput={
@@ -123,7 +123,7 @@ def dynamodb_config(dynamodb: boto3.resource,
     # Put player into DB
     table.put_item(
         Item={
-            'id': 'player_hash',
+            'playerId': 'player_hash',
             'player_data': player
         },
     )
@@ -143,13 +143,13 @@ def test_dynamodb(dynamodb: boto3.resource):
         TableName='Test',
         KeySchema=[
             {
-                'AttributeName': 'id',
+                'AttributeName': 'playerId',
                 'KeyType': 'HASH'
             }
         ],
         AttributeDefinitions=[
             {
-                'AttributeName': 'id',
+                'AttributeName': 'playerId',
                 'AttributeType': 'S'
             }
         ],
@@ -164,7 +164,7 @@ def test_dynamodb(dynamodb: boto3.resource):
     # put an item into db
     table.put_item(
         Item={
-            'id': _id,
+            'playerId': _id,
             'test_key': 'test_value'
         },
     )
@@ -172,7 +172,7 @@ def test_dynamodb(dynamodb: boto3.resource):
     # get the item
     item = table.get_item(
         Key={
-            'id': _id,
+            'playerId': _id,
         }
     )
 
@@ -190,11 +190,11 @@ def test_get_player_info(player: dict, dynamodb_config: boto3.resource) -> None:
     # Arrange - get entries from local mock database
     db_entry = dynamodb_config.get_item(
         Key={
-            'id': 'player_hash',
+            'playerId': 'player_hash',
         }
     )
     db_item = db_entry['Item']
-    del db_item['id']
+    del db_item['playerId']
     player_from_db = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
     expected_result = {'player_data': player}
 
@@ -217,11 +217,11 @@ def test_update_player_info(player: dict, dynamodb_config: boto3.resource) -> No
     # Arrange - get entries from local mock database
     original_db_entry = dynamodb_config.get_item(
         Key={
-            'id': 'player_hash',
+            'playerId': 'player_hash',
         }
     )
     db_item = original_db_entry['Item']
-    del db_item['id']
+    del db_item['playerId']
     original_player_from_db = json.loads(json.dumps(db_item, indent=4,
                                                     cls=DecimalEncoder))
 
@@ -235,11 +235,11 @@ def test_update_player_info(player: dict, dynamodb_config: boto3.resource) -> No
 
     updated_db_entry = dynamodb_config.get_item(
         Key={
-            'id': 'player_hash',
+            'playerId': 'player_hash',
         }
     )
     db_item = updated_db_entry['Item']
-    del db_item['id']
+    del db_item['playerId']
     updated_player_from_db = json.loads(json.dumps(db_item, indent=4,
                                                    cls=DecimalEncoder))
 
@@ -338,7 +338,7 @@ def test_route_bad_id(mocker: mock, mock_event: dict,
     mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
                  ".get_player_info",
                  return_value={"Error": "Queried player does not exist."})
-    mock_event["body"]["id"] = 'wrong_key'
+    mock_event["body"]["playerId"] = 'wrong_key'
 
     expected_response = {
         "statusCode": 401,

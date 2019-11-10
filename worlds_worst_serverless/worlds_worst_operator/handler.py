@@ -67,11 +67,14 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     if type(request_body) == str:
         request_body = json.loads(request_body)
     player = Player(**request_body["Player"])
-    id_token = request_body["id"]
+    id_token = request_body["playerId"]
     action = request_body["action"]
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
+
+    # Create a player
+    #create_player(player_table, player)
 
     # Verify the identity of the player
     player_query = get_player_info(table=player_table, player_token=id_token)
@@ -184,10 +187,11 @@ def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
     :return: Dictionary containing player information
     """
     # Get player information from the database
+    print(f"Getting 'playerId': {player_token} from DB")
     try:
         response = table.get_item(
             Key={
-                'id': player_token
+                'playerId': player_token
             }
         )
     except ClientError as e:
@@ -197,12 +201,33 @@ def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
             item = response['Item']
 
             # Remove the player ID from the response so it doesn't get passed around
-            del (item['id'])
+            del (item['playerId'])
 
             print("Retrieved Player Info.")
             return json.loads(json.dumps(item, indent=4, cls=DecimalEncoder))
         except KeyError:
             return {"Error": "Queried player does not exist."}
+
+
+def create_player(table: dynamodb.Table, player: Player) -> Dict:
+    """
+    Function to create a new player and save to DynamoDB
+
+    :param table: DynamoDB table object
+    :param player: Player information to put into the database
+
+    :return: Dictionary containing player information
+    """
+    # Put player into DB
+    response = table.put_item(
+        Item={
+            'playerId': 'player_hash_test',
+            'player_data': asdict(player)
+        },
+    )
+
+    print(f"Created player. response={response}")
+    return response
 
 
 def update_player_info(table: dynamodb.Table, player_token: str,
@@ -234,12 +259,10 @@ def update_player_info(table: dynamodb.Table, player_token: str,
         attribute_values[f":{letter}"] = value
 
     update_expression = update_expression[:-2]
-    print(f"Update Expression: {update_expression}")
-    print(f"Attribute Values: {attribute_values}")
 
     response = table.update_item(
         Key={
-            'id': player_token
+            'playerId': player_token
         },
         UpdateExpression=update_expression,
         ExpressionAttributeValues=attribute_values
