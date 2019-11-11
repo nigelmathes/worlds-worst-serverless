@@ -249,33 +249,32 @@ def test_update_player_info(player: dict, dynamodb_config: boto3.resource) -> No
     assert test_result['ResponseMetadata']['HTTPStatusCode'] == 200
 
 
-def test_do_combat(mocker: mock, player: dict) -> None:
+def test_do_combat(player: dict) -> None:
     """
     Test that a good combat request gets properly sent to our lambda function
 
-    :param mocker: Pytest mock fixture
     :param player: Input character dictionary
     """
     # Arrange
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.random.choice",
-                 return_value='block')
     input_player = Player(**player)
-    expected_fields_to_update = {
+    expected_player_updates = {
         "hit_points": 400,
-        "ex": 100
+        "ex": 150
     }
-    expected_message = [
-        'Truckthunders uses attack!',
-        'Test_Opponent uses block!',
-        'Test_Opponent wins.'
-    ]
+    expected_target_updates = expected_player_updates
+    expected_message = ['Truckthunders uses attack!',
+                        'Truckthunders uses attack!',
+                        'Truckthunders and Truckthunders tie.',
+                        'Truckthunders has 400 HP left.']
 
     # Act
-    updated_player, fields_to_update, message = handler.do_combat(input_player)
+    updated_player, updated_target, player_updates, target_updates, message = \
+        handler.do_combat(input_player, input_player)
 
     # Assert
     assert input_player != updated_player
-    assert fields_to_update == expected_fields_to_update
+    assert player_updates == expected_player_updates
+    assert target_updates == expected_target_updates
     assert message == expected_message
 
 
@@ -307,11 +306,10 @@ def test_route_tasks_and_response(mocker: mock, mock_event: dict,
     expected_player.hit_points = 400
     expected_player.ex = 100
 
-    expected_message = [
-        "Truckthunders uses attack!",
-        "Test_Opponent uses block!",
-        "Test_Opponent wins."
-    ]
+    expected_message = ["Truckthunders uses attack!",
+                        "Truckthunders uses block!",
+                        "Truckthunders wins.",
+                        "Truckthunders has 500 HP left."]
 
     expected_action_results = json.dumps(
         {
