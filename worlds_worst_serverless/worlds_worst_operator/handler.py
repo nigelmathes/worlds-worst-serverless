@@ -10,7 +10,7 @@ import random
 from string import ascii_lowercase
 from dataclasses import dataclass, asdict, fields
 import decimal
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 
 import boto3
 from botocore.exceptions import ClientError
@@ -66,64 +66,82 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     request_body = event.get("body")
     if type(request_body) == str:
         request_body = json.loads(request_body)
-    player = Player(**request_body["Player"])
+    # TODO: Implement location
+    # location = request_body["location"]
     id_token = request_body["playerId"]
-    action = request_body["action"]
+    action = request_body["action"].lower()
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
     # Create a player
-    #create_player(player_table, player)
+    # create_player(player_table, player)
 
     # Verify the identity of the player
     player_query = get_player_info(table=player_table, player_token=id_token)
     if 'player_data' in player_query:
-        player_db = Player(**player_query['player_data'])
+        player = Player(**player_query['player_data'])
     else:
         # Return a 401 error if the id does not match an id in the database
         # User is not authorized
         return {
             "statusCode": 401,
             "body": json.dumps({"Error": "Player does not exist in database"}),
+            "message": json.dumps('Time to reroll.'),
             "headers": {"Access-Control-Allow-Origin": "*"},
         }
 
     # Return a 403 error if the submitted information does not match the player DB info
     # User has altered their player information and is not allowed to play
-    if player != player_db:
+    # TODO: When we receive location information, use this to verify not GPS spoofing
+    """
+    if location != player_db.location:
         return {
             "statusCode": 403,
             "body": json.dumps({"Error": "Player information does not match"}),
+            "message": json.dumps('Stop cheating.'),
             "headers": {"Access-Control-Allow-Origin": "*"},
         }
+    """
 
     # If you get here, auth is good. Take action based on player ID token and action
     # Give the player the input action
     player.attack = action
     player.enhanced = False
 
-    player, fields_to_update = do_combat(player)
+    # Perform the combat action
+    player, fields_to_update, message = do_combat(player)
 
     # Update player information if it needs updating
     if fields_to_update:
+        # Player died, reset hp, ex, and status effects
+        if player.hit_points <= 0:
+            fields_to_update['hit_points'] = player.max_hit_points
+            fields_to_update['ex'] = 0
+            fields_to_update['status_effects'] = list()
+            message.append(f"{player.name} died! Rezzing you with full HP. Die less "
+                           f"next time.")
+
         update_player_info(table=player_table, player_token=id_token,
                            update_map=fields_to_update)
 
     # Return the results
     action_results = json.dumps(
-        {"Player": asdict(player), "response": None}
+        {
+            "Player": asdict(player),
+            "message": message
+        }
     )
 
     result = {
         "statusCode": 200,
         "body": action_results,
-        "headers": {"Access-Control-Allow-Origin": "*"},
+        "headers": {"Access-Control-Allow-Origin": "*"}
     }
     return result
 
 
-def do_combat(player: Player) -> Tuple[Player, Dict]:
+def do_combat(player: Player) -> Tuple[Player, Dict, List]:
     """
     Function to do combat based on a Player
 
@@ -145,7 +163,7 @@ def do_combat(player: Player) -> Tuple[Player, Dict]:
     )
 
     arn = 'arn:aws:lambda:us-east-1:437610822210:function:' \
-          'worlds-worst-combat-dev-do_combat:16'
+          'worlds-worst-combat-dev-do_combat'
     data = {"body": {"Player1": asdict(player), "Player2": asdict(target)}}
     payload = json.dumps(data)
 
@@ -158,23 +176,34 @@ def do_combat(player: Player) -> Tuple[Player, Dict]:
     #     "body": combat_results,
     #     "headers": {"Access-Control-Allow-Origin": "*"},
     # }
-    result = json.loads(json.loads(response.get('Payload').read())["body"])
+    response_payload = json.loads(response.get('Payload').read())
+    result = json.loads(response_payload["body"])
+
+    print(result)
+
+    message = result["message"]
     updated_player = Player(**result["Player1"])
     target = Player(**result["Player2"])
 
     # Figure out if something happened and needs updating
     fields_to_update = dict()
     if player != updated_player:
-        print("Player updated!")
+        print("Player needs updating!")
         # Loop over player fields and output what needs updating as dict
         for field in fields(player):
             old_value = getattr(player, field.name)
             new_value = getattr(updated_player, field.name)
             if old_value != new_value:
-                print(f"{field.name} is different, updating to {new_value}")
-                fields_to_update[field.name] = new_value
+                # Do not update if hit points or EX is max
+                if field.name == 'hit_points' and new_value >= player.max_hit_points:
+                    print("Hit points already max. Not updating.")
+                elif field.name == 'ex' and new_value >= player.max_ex:
+                    print("EX meter already max. Not updating.")
+                else:
+                    print(f"{field.name} is different, updating to {new_value}")
+                    fields_to_update[field.name] = new_value
 
-    return updated_player, fields_to_update
+    return updated_player, fields_to_update, message
 
 
 def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:

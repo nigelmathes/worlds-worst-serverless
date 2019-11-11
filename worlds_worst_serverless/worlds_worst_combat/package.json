@@ -2,6 +2,8 @@
   "name": "worlds-worst-combat",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
+  "dependencies": {
+    "serverless": "^1.57.0"
+  },
   "devDependencies": {}
 }

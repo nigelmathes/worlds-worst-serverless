@@ -66,9 +66,10 @@ def mock_event(player1: dict, player2: dict) -> dict:
     :return: Mock event dict
     """
     return {
-        "statusCode": 200,
-        "body": {"Player1": player1, "Player2": player2},
-        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": {
+            "Player1": player1,
+            "Player2": player2,
+        }
     }
 
 
@@ -84,13 +85,20 @@ def test_combat_round_p1_wins(mock_event: dict, abilities: dict) -> None:
         mock_event["body"]["Player2"]["hit_points"]
         - abilities[2]["effects"][0]["value"]
     )
+    expected_message = [
+        'Truckthunders uses attack!',
+        'Crunchbucket uses area!',
+        'Truckthunders wins.'
+    ]
 
     # Act
     combat_result = do_combat(mock_event, mock_event)
     combat_body = json.loads(combat_result["body"])
+    combat_message = combat_body["message"]
 
     # Assert
     assert combat_body["Player2"]["hit_points"] == expected_player2_hp
+    assert combat_message == expected_message
 
 
 def test_matchups(mock_event: dict) -> None:
@@ -150,13 +158,23 @@ def test_check_dead(mock_event: dict) -> None:
     """
     # Arrange
     mock_event["body"]["Player1"]["hit_points"] = 0
+    expected_message = [
+        'Truckthunders died to their status effects.'
+    ]
+    expected_body = {
+        "Player1": mock_event["body"]["Player1"],
+        "Player2": mock_event["body"]["Player2"],
+        "message": expected_message
+    }
 
     # Act
     combat_result = do_combat(mock_event, mock_event)
     combat_body = json.loads(combat_result["body"])
+    combat_message = combat_body["message"]
 
     # Assert nothing has changed and the combat result equals the input dict
-    assert combat_body == mock_event["body"]
+    assert combat_body == expected_body
+    assert combat_message == expected_message
 
 
 def test_multiple_status(mock_event: dict) -> None:
@@ -198,9 +216,7 @@ def test_multiple_status(mock_event: dict) -> None:
     # Act - Do it again! Player1 does not re-apply prone
     combat_body_2["Player1"]["enhanced"] = "False"
     combat_result_2 = {
-        "statusCode": 200,
-        "body": combat_body_2,
-        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": combat_body_2
     }
 
     # Perform a round of combat

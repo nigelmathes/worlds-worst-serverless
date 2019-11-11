@@ -15,9 +15,12 @@
                                false-value=false>Enhanced?<br>
                         <button class="btn btn-success">Submit</button>
                         </form>
-                        <pre>
-                        {{output}}
-                        </pre>
+                        <strong>{{result}}</strong>
+                        <ul>
+                            <li v-for="item in action_log" v-bind:key="item.id">
+                                {{ item }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -31,7 +34,8 @@
             return {
               attack: '',
               enhanced: '',
-              output: ''
+              action_log: '',
+              result: ''
             };
         },
         methods: {
@@ -39,26 +43,18 @@
                 e.preventDefault();
                 let currentObj = this;
                 let inputs = {
-                  Player: {
-                    name: 'TruckThunders',
-                    character_class: 'Photonic',
-                    max_hit_points: 500,
-                    max_ex: 1000,
-                    hit_points: 500,
-                    ex: 100,
-                    status_effects: [],
-                    attack: this.attack,
-                    enhanced: this.enhanced === 'true'
-                  },
                   playerId: 'player_hash',
                   action: this.attack
                 };
                 this.axios.post('https://aiexd2xz1m.execute-api.us-east-1.amazonaws.com/dev/route', inputs)
                 .then(function (response) {
-                    currentObj.output = response.data;
+                    let output = response.data;
+                    currentObj.action_log = output['message'];
+                    currentObj.result = output['Player'];
                 })
                 .catch(function (error) {
-                    currentObj.output = error;
+                    currentObj.action_log = '';
+                    currentObj.result = error;
                 });
             }
         }

@@ -264,13 +264,19 @@ def test_do_combat(mocker: mock, player: dict) -> None:
         "hit_points": 400,
         "ex": 100
     }
+    expected_message = [
+        'Truckthunders uses attack!',
+        'Test_Opponent uses block!',
+        'Test_Opponent wins.'
+    ]
 
     # Act
-    updated_player, fields_to_update = handler.do_combat(input_player)
+    updated_player, fields_to_update, message = handler.do_combat(input_player)
 
     # Assert
     assert input_player != updated_player
     assert fields_to_update == expected_fields_to_update
+    assert message == expected_message
 
 
 def test_route_tasks_and_response(mocker: mock, mock_event: dict,
@@ -301,8 +307,17 @@ def test_route_tasks_and_response(mocker: mock, mock_event: dict,
     expected_player.hit_points = 400
     expected_player.ex = 100
 
+    expected_message = [
+        "Truckthunders uses attack!",
+        "Test_Opponent uses block!",
+        "Test_Opponent wins."
+    ]
+
     expected_action_results = json.dumps(
-        {"Player": asdict(expected_player), "response": None}
+        {
+            "Player": asdict(expected_player),
+            "message": expected_message
+        }
     )
 
     expected_response = {
@@ -343,6 +358,7 @@ def test_route_bad_id(mocker: mock, mock_event: dict,
     expected_response = {
         "statusCode": 401,
         "body": json.dumps({"Error": "Player does not exist in database"}),
+        "message": json.dumps('Time to reroll.'),
         "headers": {"Access-Control-Allow-Origin": "*"},
     }
 
@@ -353,9 +369,10 @@ def test_route_bad_id(mocker: mock, mock_event: dict,
     assert response == expected_response
 
 
+""" TODO: Make this not FUBAR
 def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
                              dynamodb_config: boto3.resource) -> None:
-    """
+    
     Test that the operator router returns 403 Forbidden if the input
     player does not match the player in the database
 
@@ -363,7 +380,7 @@ def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
     :param mock_event: Mock AWS lambda event dict
     :param player: Input character dictionary
     :param dynamodb_config: boto3 config with our resource
-    """
+    
     # Arrange
     # Mock all the things we already tested
     mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.random.choice",
@@ -392,3 +409,4 @@ def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
 
     # Assert
     assert response == expected_response
+"""

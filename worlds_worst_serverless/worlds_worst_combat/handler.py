@@ -63,6 +63,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     left_player = Player(**request_body["Player1"])
     right_player = Player(**request_body["Player2"])
 
+    # Store the series of events
+    message = []
+
     # Read in the abilities data
     path_to_file = Path(__file__).parent / "abilities.json"
     with path_to_file.open() as json_file:
@@ -77,13 +80,22 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         "dodge": {"beats": ["attack", "block"], "loses": ["area", "disrupt"]},
     }
 
+    # Apply status effects
     left_player, right_player, rules = apply_status(left_player, right_player, rules)
 
     # Check if anyone died from added effects
     if check_dead(left_player.hit_points, right_player.hit_points):
         # If dead, return the combat results immediately, do not do combat
+        if left_player.hit_points <= 0:
+            message.append(f"{left_player.name} died to their status effects.")
+        else:
+            message.append(f"{right_player.name} died to their status effects.")
         combat_results = json.dumps(
-            {"Player1": asdict(left_player), "Player2": asdict(right_player)}
+            {
+                "Player1": asdict(left_player),
+                "Player2": asdict(right_player),
+                "message": message
+            }
         )
         result = {
             "statusCode": 200,
@@ -93,12 +105,15 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         return result
 
     # Determine the winner
+    message.append(f"{left_player.name} uses {left_player.attack}!")
+    message.append(f"{right_player.name} uses {right_player.attack}!")
     outcome = calculate_winner(
         rules=rules, left_attack=left_player.attack, right_attack=right_player.attack
     )
 
     # Do combat effects based upon the outcome
     if outcome == "left_wins":
+        message.append(f"{left_player.name} wins.")
         # Update EX meters
         left_player.ex += 50
         right_player.ex += 100
@@ -120,6 +135,7 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             )
 
     elif outcome == "right_wins":
+        message.append(f"{right_player.name} wins.")
         # Update EX meters
         left_player.ex += 100
         right_player.ex += 50
@@ -140,6 +156,7 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                 ability=ability_to_use, target=left_player, self=right_player
             )
     else:
+        message.append(f"{left_player.name} and {right_player.name} tie.")
         # Update EX meters
         left_player.ex += 150
         right_player.ex += 150
@@ -172,12 +189,16 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
     # Return the combat results
     combat_results = json.dumps(
-        {"Player1": asdict(left_player), "Player2": asdict(right_player)}
+        {
+            "Player1": asdict(left_player),
+            "Player2": asdict(right_player),
+            "message": message
+        }
     )
+
     result = {
         "statusCode": 200,
         "body": combat_results,
-        "headers": {"Access-Control-Allow-Origin": "*"},
+        "headers": {"Access-Control-Allow-Origin": "*"}
     }
-
     return result
