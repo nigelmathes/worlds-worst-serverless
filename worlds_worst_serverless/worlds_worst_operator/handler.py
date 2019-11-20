@@ -71,6 +71,10 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     id_token = request_body["playerId"]
     target_token = 'target_hash'
     action = request_body["action"].lower()
+    if isinstance(request_body["enhanced"], str):
+        enhanced = json.loads(request_body["enhanced"])
+    else:
+        enhanced = request_body["enhanced"]
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
@@ -78,6 +82,8 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # Verify the identity of the player
     player_query = get_player_info(table=player_table, player_token=id_token)
     if 'player_data' in player_query:
+        player_query['player_data']['status_effects'] = \
+            json.loads(player_query['player_data']['status_effects'])
         player = Player(**player_query['player_data'])
     else:
         # Return a 401 error if the id does not match an id in the database
@@ -104,11 +110,13 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # If you get here, auth is good. Take action based on player ID token and action
     # Give the player the input action
     player.attack = action
-    player.enhanced = False
+    player.enhanced = enhanced
 
     # Get target from the database
     target_query = get_player_info(table=player_table, player_token=target_token)
-    if 'player_data' in player_query:
+    if 'player_data' in target_query:
+        target_query['player_data']['status_effects'] = \
+            json.loads(target_query['player_data']['status_effects'])
         target = Player(**target_query['player_data'])
     else:
         # Return a 401 error if the id does not match an id in the database

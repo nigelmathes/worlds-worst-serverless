@@ -296,7 +296,6 @@ def inflict_random_gun(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-# TODO: Test all random effects
 def apply_pistol(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of pistol:
@@ -325,7 +324,6 @@ def apply_pistol(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-# TODO: Test all random effects
 def apply_rifle(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of rifle:
@@ -337,7 +335,6 @@ def apply_rifle(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-# TODO: Test all random effects
 def apply_shotgun(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of shotgun:
@@ -363,7 +360,6 @@ def apply_shotgun(player: Player, rules: dict, left: bool) -> Tuple[Player, dict
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-# TODO: Test all random effects
 def apply_rocket_launcher(
     player: Player, rules: dict, left: bool
 ) -> Tuple[Player, dict]:
@@ -393,8 +389,7 @@ def apply_rocket_launcher(
     return player, rules
 
 
-# Enhanced effect of Hacker's Flicker
-# TODO: Test this to make sure both anti attack and anti area are covered
+# Enhanced effect of Hacker's Flicker - anti_attack and anti_area
 def inflict_anti_attack(value: int, player: Player) -> Player:
     """
     Your character flickers in place, and attacks seem to go through you
@@ -405,8 +400,7 @@ def inflict_anti_attack(value: int, player: Player) -> Player:
     return player
 
 
-# Enhanced effect of Hacker's Flicker
-# TODO: Test this to make sure both anti attack and anti area are covered
+# Enhanced effect of Hacker's Flicker - anti_attack
 def apply_anti_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of anti_attack:
@@ -418,7 +412,7 @@ def apply_anti_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, 
     return player, rules
 
 
-# Enhanced effect of Hacker's Flicker
+# Enhanced effect of Hacker's Flicker - anti_area
 def inflict_anti_area(value: int, player: Player) -> Player:
     """
     Your character flickers in place, and attacks seem to go through you
@@ -429,7 +423,7 @@ def inflict_anti_area(value: int, player: Player) -> Player:
     return player
 
 
-# Enhanced effect of Hacker's Flicker
+# Enhanced effect of Hacker's Flicker - lag
 def apply_anti_area(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of anti_attack:
@@ -441,7 +435,7 @@ def apply_anti_area(player: Player, rules: dict, left: bool) -> Tuple[Player, di
     return player, rules
 
 
-# Enhanced effect of Dreamer's Moving Sidewalk - prone
+# Enhanced effect of Hacker's Lag Out - lag
 def inflict_lag(value: int, player: Player) -> Player:
     """
     Make the target lag.
@@ -452,7 +446,7 @@ def inflict_lag(value: int, player: Player) -> Player:
     return player
 
 
-# Enhanced effect of Dreamer's Moving Sidewalk - prone
+# Enhanced effect of Hacker's Lag Out - lag
 def apply_lag(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of lag to the player:
@@ -513,7 +507,8 @@ def inflict_buff_attack(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Photonic's Light Barrier
-def apply_double_damage(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+# TODO: This is broken. You need the target here. Might need to add target to inputs.
+def apply_buff_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
     """
     Apply the effects of double_damage to the target:
     do double damage

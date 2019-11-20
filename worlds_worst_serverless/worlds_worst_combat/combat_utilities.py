@@ -2,7 +2,7 @@
 Holds all combat logic
 """
 import copy
-from typing import Tuple, Any
+from typing import Tuple, Any, Dict
 
 try:
     import combat_effects
@@ -79,7 +79,7 @@ def apply_status(
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
             player2, rules = getattr(combat_effects, "apply_" + status_effect[0])(
-                player=player2, rules=rules, left=True
+                player=player2, rules=rules, left=False
             )
 
             # Decrease the duration of this status effect
@@ -92,7 +92,7 @@ def apply_status(
     return player1, player2, rules
 
 
-def find_ability(abilities: list, character_class: str, attack_type: str):
+def find_ability(abilities: list, character_class: str, attack_type: str) -> Dict:
     """
     Function to find the right ability to use for a given combat outcome
 

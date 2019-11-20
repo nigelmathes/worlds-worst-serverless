@@ -130,6 +130,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
         # If enhanced, apply the enhancements
         if left_player.enhanced is True:
+            message.append(f"{left_player.name} enhanced {left_player.attack}! "
+                           f"Applying effects: "
+                           f"{ability_to_use['enhancements']}.")
             apply_enhancements(
                 ability=ability_to_use, target=right_player, self=left_player
             )
@@ -152,6 +155,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
         # If enhanced, apply the enhancements
         if right_player.enhanced is True:
+            message.append(f"{right_player.name} enhanced {right_player.attack}! "
+                           f"Applying effects: "
+                           f"{ability_to_use['enhancements']}.")
             apply_enhancements(
                 ability=ability_to_use, target=left_player, self=right_player
             )
@@ -179,10 +185,16 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
         # If enhanced, apply the enhancements, with left getting priority
         if left_player.enhanced is True:
+            message.append(f"{left_player.name} enhanced {left_player.attack}! "
+                           f"Applying effects: "
+                           f"{left_ability['enhancements']}.")
             apply_enhancements(
                 ability=left_ability, target=right_player, self=left_player
             )
         if right_player.enhanced is True:
+            message.append(f"{right_player.name} enhanced {right_player.attack}! "
+                           f"Applying effects: "
+                           f"{right_ability['enhancements']}.")
             apply_enhancements(
                 ability=right_ability, target=left_player, self=right_player
             )

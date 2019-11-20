@@ -3,8 +3,15 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">Welcome to the world's worst combat
-                        system!</div>
+                    <strong>You are TruckThunders, a Photonic. You can enhance attacks
+                        of the type disrupt and area.<br></strong>
+                    <weak>Enhanced Disrupt = Conveyor: Target is Prone. Next turn, block
+                        loses to area<br></weak>
+                    <weak>Enhanced Area = Distort Earth: Target is Disoriented. Next
+                        turn, dodge loses to attack<br><br></weak>
+                    <weak>Input any of the following commands below, and you may
+                        choose to enhance them:<br></weak>
+                    <strong>attack, block, dodge, disrupt, area<br><br></strong>
                     <div class="card-body">
                         <form @submit="formSubmit">
                         <strong>Attack Type:</strong>
@@ -15,7 +22,11 @@
                                false-value=false>Enhanced?<br>
                         <button class="btn btn-success">Submit</button>
                         </form>
-                        <strong>{{result}}</strong>
+                        <strong>
+                            <br>Your HP: {{result.hit_points}}<br>
+                            Your EX: {{result.ex}}<br>
+                            Your Status Effects: {{result.status_effects}}<br>
+                        </strong>
                         <ul>
                             <li v-for="item in action_log" v-bind:key="item.id">
                                 {{ item }}
@@ -33,9 +44,13 @@
         data() {
             return {
               attack: '',
-              enhanced: '',
+              enhanced: false,
               action_log: '',
-              result: ''
+              result: {
+                  'hit_points': 500,
+                  'ex': 0,
+                  'status_effects': []
+              }
             };
         },
         methods: {
@@ -44,7 +59,8 @@
                 let currentObj = this;
                 let inputs = {
                   playerId: 'player_hash',
-                  action: this.attack
+                  action: this.attack,
+                  enhanced: this.enhanced
                 };
                 this.axios.post('https://aiexd2xz1m.execute-api.us-east-1.amazonaws.com/dev/route', inputs)
                 .then(function (response) {
