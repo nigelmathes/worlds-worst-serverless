@@ -67,7 +67,8 @@ def apply_status(
                 player=player1, rules=rules, left=True
             )
 
-            # Decrease the duration of this status effect
+            # Decrease the duration of this status effect, which is a list like this:
+            # ['name_of_status', duration], so we index to 1 to get duration
             status_effect[1] -= 1
 
             # Remove status effect if duration is 0
@@ -82,7 +83,8 @@ def apply_status(
                 player=player2, rules=rules, left=False
             )
 
-            # Decrease the duration of this status effect
+            # Decrease the duration of this status effect, which is a list like this:
+            # ['name_of_status', duration], so we index to 1 to get duration
             status_effect[1] -= 1
 
             # Remove status effect if duration is 0

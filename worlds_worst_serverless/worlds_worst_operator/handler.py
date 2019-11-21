@@ -7,50 +7,30 @@ import json
 import os
 import random
 
-from string import ascii_lowercase
-from dataclasses import dataclass, asdict, fields
-import decimal
+from dataclasses import asdict, fields
 from typing import Dict, Any, Tuple, List
 
 import boto3
-from botocore.exceptions import ClientError
+
+try:
+    from database_ops import (
+        get_player_info,
+        create_player,
+        update_player_info
+    )
+    from player_data import Player
+except ImportError:
+    from .database_ops import (
+        get_player_info,
+        create_player,
+        update_player_info
+    )
+    from .player_data import Player
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 lambda_client = boto3.client('lambda', region_name='us-east-1')
 
 LambdaDict = Dict[str, Any]
-
-
-@dataclass
-class Player:
-    """
-    Class to hold player information
-    """
-
-    name: str
-    character_class: str
-    max_hit_points: int
-    max_ex: int
-    hit_points: int
-    ex: int
-    status_effects: list
-    attack: str
-    enhanced: bool
-
-
-# Helper class to convert a DynamoDB item to JSON.
-class DecimalEncoder(json.JSONEncoder):
-    """
-    This is a workaround for: http://bugs.python.org/issue16535
-    """
-
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if o % 1 > 0:
-                return float(o)
-            else:
-                return int(o)
-        return super(DecimalEncoder, self).default(o)
 
 
 def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDict:
@@ -82,8 +62,10 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # Verify the identity of the player
     player_query = get_player_info(table=player_table, player_token=id_token)
     if 'player_data' in player_query:
-        player_query['player_data']['status_effects'] = \
-            json.loads(player_query['player_data']['status_effects'])
+        # Deal with string vs. list
+        if type(player_query['player_data']['status_effects']) != list:
+            player_query['player_data']['status_effects'] = \
+                json.loads(player_query['player_data']['status_effects'])
         player = Player(**player_query['player_data'])
     else:
         # Return a 401 error if the id does not match an id in the database
@@ -115,8 +97,10 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # Get target from the database
     target_query = get_player_info(table=player_table, player_token=target_token)
     if 'player_data' in target_query:
-        target_query['player_data']['status_effects'] = \
-            json.loads(target_query['player_data']['status_effects'])
+        # Deal with string vs. list
+        if type(target_query['player_data']['status_effects']) != list:
+            target_query['player_data']['status_effects'] = \
+                json.loads(target_query['player_data']['status_effects'])
         target = Player(**target_query['player_data'])
     else:
         # Return a 401 error if the id does not match an id in the database
@@ -242,97 +226,3 @@ def create_update_fields(player: Player, updated_player: Player) -> Dict:
                     fields_to_update[field.name] = new_value
 
     return fields_to_update
-
-
-def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
-    """
-    Function to get player information from DynamoDB
-
-    :param table: DynamoDB table object
-    :param player_token: Player ID token linking player to database entry
-
-    :return: Dictionary containing player information
-    """
-    # Get player information from the database
-    print(f"Getting 'playerId': {player_token} from DB")
-    try:
-        response = table.get_item(
-            Key={
-                'playerId': player_token
-            }
-        )
-    except ClientError as e:
-        return e.response['Error']['Message']
-    else:
-        try:
-            item = response['Item']
-
-            # Remove the player ID from the response so it doesn't get passed around
-            del (item['playerId'])
-
-            print("Retrieved Player Info.")
-            return json.loads(json.dumps(item, indent=4, cls=DecimalEncoder))
-        except KeyError:
-            return {"Error": "Queried player does not exist."}
-
-
-def create_player(table: dynamodb.Table, player: Player) -> Dict:
-    """
-    Function to create a new player and save to DynamoDB
-
-    :param table: DynamoDB table object
-    :param player: Player information to put into the database
-
-    :return: Dictionary containing player information
-    """
-    # Put player into DB
-    response = table.put_item(
-        Item={
-            'playerId': 'target_hash',
-            'player_data': asdict(player)
-        },
-    )
-
-    print(f"Created player. response={response}")
-    return response
-
-
-def update_player_info(table: dynamodb.Table, player_token: str,
-                       update_map: Dict) -> Dict:
-    """
-    Function to update player information in DynamoDB
-
-    :param table: DynamoDB table object
-    :param player_token: Player ID token linking player to database entry
-    :param update_map: Dictionary mapping player information to database entry info
-
-    :return: Response of DynamoDB table update
-    """
-    update_expression = "set "
-    attribute_values = dict()
-    alphabet = iter(ascii_lowercase)
-
-    # Construct the UpdateExpression and ExpressionAttributeValues for update
-    # Of the form:
-    #     UpdateExpression="set info.rating = :r, info.plot=:p, info.actors=:a",
-    #     ExpressionAttributeValues={
-    #         ':r': decimal.Decimal(5.5),
-    #         ':p': "Everything happens all at once.",
-    #         ':a': ["Larry", "Moe", "Curly"]
-    #     },
-    for key, value in update_map.items():
-        letter = next(alphabet)
-        update_expression += f"player_data.{key} = :{letter}, "
-        attribute_values[f":{letter}"] = value
-
-    update_expression = update_expression[:-2]
-
-    response = table.update_item(
-        Key={
-            'playerId': player_token
-        },
-        UpdateExpression=update_expression,
-        ExpressionAttributeValues=attribute_values
-    )
-
-    return response

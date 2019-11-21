@@ -4,7 +4,6 @@ the actual worlds_worst_combat serverless arn/endpoint
 """
 
 import boto3
-import copy
 import decimal
 import json
 import pytest
@@ -67,7 +66,7 @@ def player():
         "ex": 0,
         "status_effects": [],
         "attack": "attack",
-        "enhanced": False,
+        "enhanced": False
     }
 
 
@@ -83,7 +82,8 @@ def mock_event(player: dict) -> dict:
         "body": {
             "Player": player,
             "playerId": "player_hash",
-            "action": "attack"
+            "action": "attack",
+            "enhanced": False
         }
     }
 
