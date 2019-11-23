@@ -16,7 +16,7 @@
                         <form @submit="formSubmit">
                         <strong>Attack Type:</strong>
                         <input type="text" class="form-control"
-                               v-model="attack">
+                               v-model="action">
                         <input type="checkbox" name="enhanced"
                                v-model="enhanced" true-value=true
                                false-value=false>Enhanced?<br>
@@ -43,7 +43,7 @@
     export default {
         data() {
             return {
-              attack: '',
+              action: '',
               enhanced: false,
               action_log: '',
               result: {
@@ -59,7 +59,7 @@
                 let currentObj = this;
                 let inputs = {
                   playerId: 'player_hash',
-                  action: this.attack,
+                  action: this.action,
                   enhanced: this.enhanced
                 };
                 this.axios.post('https://aiexd2xz1m.execute-api.us-east-1.amazonaws.com/dev/route', inputs)

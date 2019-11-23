@@ -14,5 +14,5 @@ class Player:
     hit_points: int
     ex: int
     status_effects: list
-    attack: str
+    action: str
     enhanced: bool

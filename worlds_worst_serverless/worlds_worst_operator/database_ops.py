@@ -13,7 +13,7 @@ try:
 except ImportError:
     from .player_data import Player
 
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 
 
 # Helper class to convert a DynamoDB item to JSON.
@@ -43,19 +43,15 @@ def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
     # Get player information from the database
     print(f"Getting 'playerId': {player_token} from DB")
     try:
-        response = table.get_item(
-            Key={
-                'playerId': player_token
-            }
-        )
+        response = table.get_item(Key={"playerId": player_token})
     except ClientError as e:
-        return e.response['Error']['Message']
+        return e.response["Error"]["Message"]
     else:
         try:
-            item = response['Item']
+            item = response["Item"]
 
             # Remove the player ID from the response so it doesn't get passed around
-            del (item['playerId'])
+            del (item["playerId"])
 
             print("Retrieved Player Info.")
             return json.loads(json.dumps(item, indent=4, cls=DecimalEncoder))
@@ -74,18 +70,16 @@ def create_player(table: dynamodb.Table, player: Player) -> Dict:
     """
     # Put player into DB
     response = table.put_item(
-        Item={
-            'playerId': 'target_hash',
-            'player_data': asdict(player)
-        },
+        Item={"playerId": "target_hash", "player_data": asdict(player)}
     )
 
     print(f"Created player. response={response}")
     return response
 
 
-def update_player_info(table: dynamodb.Table, player_token: str,
-                       update_map: Dict) -> Dict:
+def update_player_info(
+    table: dynamodb.Table, player_token: str, update_map: Dict
+) -> Dict:
     """
     Function to update player information in DynamoDB
 
@@ -115,11 +109,9 @@ def update_player_info(table: dynamodb.Table, player_token: str,
     update_expression = update_expression[:-2]
 
     response = table.update_item(
-        Key={
-            'playerId': player_token
-        },
+        Key={"playerId": player_token},
         UpdateExpression=update_expression,
-        ExpressionAttributeValues=attribute_values
+        ExpressionAttributeValues=attribute_values,
     )
 
     return response

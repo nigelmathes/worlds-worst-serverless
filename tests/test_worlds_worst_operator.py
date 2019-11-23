@@ -51,7 +51,7 @@ class Player:
     hit_points: int
     ex: int
     status_effects: list
-    attack: str
+    action: str
     enhanced: bool
 
 
@@ -65,7 +65,7 @@ def player():
         "hit_points": 500,
         "ex": 0,
         "status_effects": [],
-        "attack": "attack",
+        "action": "attack",
         "enhanced": False
     }
 

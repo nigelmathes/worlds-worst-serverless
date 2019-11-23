@@ -17,7 +17,7 @@ def player1():
         "hit_points": 500,
         "ex": 0,
         "status_effects": [],
-        "attack": "attack",
+        "action": "attack",
         "enhanced": False,
     }
 
@@ -32,7 +32,7 @@ def player2():
         "hit_points": 500,
         "ex": 0,
         "status_effects": [],
-        "attack": "area",
+        "action": "area",
         "enhanced": False,
     }
 
@@ -135,8 +135,8 @@ def test_matchups(mock_event: dict) -> None:
     # Perform a round of combat
     for i, player1_attack in enumerate(player1_attacks):
         for j, player2_attack in enumerate(player2_attacks):
-            mock_event["body"]["Player1"]["attack"] = player1_attack
-            mock_event["body"]["Player2"]["attack"] = player2_attack
+            mock_event["body"]["Player1"]["action"] = player1_attack
+            mock_event["body"]["Player2"]["action"] = player2_attack
 
             combat_result = do_combat(mock_event, mock_event)
             combat_body = json.loads(combat_result["body"])
@@ -184,8 +184,8 @@ def test_multiple_status(mock_event: dict) -> None:
     :param mock_event: Mock AWS lambda event dict
     """
     # Arrange
-    mock_event["body"]["Player1"]["attack"] = "disrupt"
-    mock_event["body"]["Player2"]["attack"] = "block"
+    mock_event["body"]["Player1"]["action"] = "disrupt"
+    mock_event["body"]["Player2"]["action"] = "block"
     mock_event["body"]["Player1"]["status_effects"] = [["disorient", 5], ["poison", 12]]
     mock_event["body"]["Player1"]["enhanced"] = True
 
@@ -239,9 +239,9 @@ def test_random_gun(mock_event: dict) -> None:
     """
     # Arrange
     mock_event["body"]["Player1"]["character_class"] = "Creator"
-    mock_event["body"]["Player1"]["attack"] = "attack"
+    mock_event["body"]["Player1"]["action"] = "attack"
     mock_event["body"]["Player1"]["enhanced"] = True
-    mock_event["body"]["Player2"]["attack"] = "disrupt"
+    mock_event["body"]["Player2"]["action"] = "disrupt"
     possible_status = ["pistol", "rifle", "shotgun", "rocket_launcher"]
 
     # Act
@@ -286,8 +286,8 @@ def test_enhancements(
     # Arrange
     mock_event["body"]["Player1"]["character_class"] = character_class
     mock_event["body"]["Player1"]["enhanced"] = True
-    mock_event["body"]["Player1"]["attack"] = ability_combo[0]
-    mock_event["body"]["Player2"]["attack"] = ability_combo[1]
+    mock_event["body"]["Player1"]["action"] = ability_combo[0]
+    mock_event["body"]["Player2"]["action"] = ability_combo[1]
 
     player1_action = [
         x
