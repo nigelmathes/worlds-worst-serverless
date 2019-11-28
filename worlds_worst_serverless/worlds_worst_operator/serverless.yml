@@ -24,7 +24,7 @@ provider:
 
 functions:
   route:
-    handler: handler.route_tasks_and_response
+    handler: operator.route_tasks_and_response
     timeout: 30
     events:
       - http:

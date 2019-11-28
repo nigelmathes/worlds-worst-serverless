@@ -65,12 +65,7 @@ def mock_event(player1: dict, player2: dict) -> dict:
     :param player2: Input character 2 see above
     :return: Mock event dict
     """
-    return {
-        "body": {
-            "Player1": player1,
-            "Player2": player2,
-        }
-    }
+    return {"body": {"Player1": player1, "Player2": player2}}
 
 
 def test_combat_round_p1_wins(mock_event: dict, abilities: dict) -> None:
@@ -86,9 +81,9 @@ def test_combat_round_p1_wins(mock_event: dict, abilities: dict) -> None:
         - abilities[2]["effects"][0]["value"]
     )
     expected_message = [
-        'Truckthunders uses attack!',
-        'Crunchbucket uses area!',
-        'Truckthunders wins.'
+        "Truckthunders uses attack!",
+        "Crunchbucket uses area!",
+        "Truckthunders wins.",
     ]
 
     # Act
@@ -158,13 +153,11 @@ def test_check_dead(mock_event: dict) -> None:
     """
     # Arrange
     mock_event["body"]["Player1"]["hit_points"] = 0
-    expected_message = [
-        'Truckthunders died to their status effects.'
-    ]
+    expected_message = ["Truckthunders died to their status effects."]
     expected_body = {
         "Player1": mock_event["body"]["Player1"],
         "Player2": mock_event["body"]["Player2"],
-        "message": expected_message
+        "message": expected_message,
     }
 
     # Act
@@ -215,9 +208,7 @@ def test_multiple_status(mock_event: dict) -> None:
 
     # Act - Do it again! Player1 does not re-apply prone
     combat_body_2["Player1"]["enhanced"] = "False"
-    combat_result_2 = {
-        "body": combat_body_2
-    }
+    combat_result_2 = {"body": combat_body_2}
 
     # Perform a round of combat
     combat_result_3 = do_combat(combat_result_2, combat_result_2)

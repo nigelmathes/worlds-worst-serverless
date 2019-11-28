@@ -2,7 +2,7 @@ import decimal
 import json
 from dataclasses import asdict
 from string import ascii_lowercase
-from typing import Dict
+from typing import Dict, Tuple
 
 import boto3
 
@@ -31,7 +31,7 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
-def get_player_info(table: dynamodb.Table, player_token: str) -> Dict:
+def get_player(table: dynamodb.Table, player_token: str) -> Dict:
     """
     Function to get player information from DynamoDB
 
@@ -70,14 +70,14 @@ def create_player(table: dynamodb.Table, player: Player) -> Dict:
     """
     # Put player into DB
     response = table.put_item(
-        Item={"playerId": "target_hash", "player_data": asdict(player)}
+        Item={"playerId": player.name, "player_data": asdict(player)}
     )
 
-    print(f"Created player. response={response}")
+    print(f"Created player {player.name}")
     return response
 
 
-def update_player_info(
+def update_player(
     table: dynamodb.Table, player_token: str, update_map: Dict
 ) -> Dict:
     """
@@ -115,3 +115,26 @@ def update_player_info(
     )
 
     return response
+
+
+def verify_player(table: dynamodb.Table, player_token: str) -> Tuple[Dict, bool]:
+    """
+    Verify the identity of the player
+    """
+    player_query = get_player(table=table, player_token=player_token)
+    if "player_data" in player_query:
+        # Deal with string vs. list
+        if type(player_query["player_data"]["status_effects"]) != list:
+            player_query["player_data"]["status_effects"] = json.loads(
+                player_query["player_data"]["status_effects"]
+            )
+        return player_query["player_data"], True
+    else:
+        # Return a 401 error if the id does not match an id in the database
+        # User is not authorized
+        return {
+            "statusCode": 401,
+            "body": json.dumps({"Error": "Player does not exist in database"}),
+            "message": json.dumps("Time to reroll."),
+            "headers": {"Access-Control-Allow-Origin": "*"},
+        }, False

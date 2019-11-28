@@ -6,6 +6,7 @@ except ImportError:
 import json
 import os
 import random
+from pathlib import Path
 
 from dataclasses import asdict
 from typing import Dict, Any, Callable
@@ -13,11 +14,11 @@ from typing import Dict, Any, Callable
 import boto3
 
 try:
-    from database_ops import get_player_info, create_player, update_player_info
+    from database_ops import get_player, create_player, update_player, verify_player
     from player_data import Player
     from actions import ACTIONS_MAP, unknown_action, do_combat
 except ImportError:
-    from .database_ops import get_player_info, create_player, update_player_info
+    from .database_ops import get_player, create_player, update_player, verify_player
     from .player_data import Player
     from .actions import ACTIONS_MAP, unknown_action, do_combat
 
@@ -53,37 +54,21 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # Set up the database access
     player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
 
-    # Verify the identity of the player
-    player_query = get_player_info(table=player_table, player_token=id_token)
-    if "player_data" in player_query:
-        # Deal with string vs. list
-        if type(player_query["player_data"]["status_effects"]) != list:
-            player_query["player_data"]["status_effects"] = json.loads(
-                player_query["player_data"]["status_effects"]
-            )
-        player = Player(**player_query["player_data"])
-    else:
-        # Return a 401 error if the id does not match an id in the database
-        # User is not authorized
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"Error": "Player does not exist in database"}),
-            "message": json.dumps("Time to reroll."),
-            "headers": {"Access-Control-Allow-Origin": "*"},
-        }
+    # If action is reset, do the table reset and return here
+    if action == "reset":
+        result = reset_characters(table=player_table)
+        # Contains return dict with a 200 statusCode
+        return result
 
-    # Return a 403 error if the submitted information does not match the player DB info
-    # User has altered their player information and is not allowed to play
-    # TODO: When we receive location information, use this to verify not GPS spoofing
-    """
-    if location != player_db.location:
-        return {
-            "statusCode": 403,
-            "body": json.dumps({"Error": "Player information does not match"}),
-            "message": json.dumps('Stop cheating.'),
-            "headers": {"Access-Control-Allow-Origin": "*"},
-        }
-    """
+    # Verify the ID of the player and load player data if successful
+    player_data, verified = verify_player(table=player_table, player_token=id_token)
+
+    if verified:
+        player = Player(**player_data)
+    else:
+        # Contains the return dict with a 401 statusCode
+        return player_data
+
     # If you get here, auth is good. Take action based on player ID token and action
     function_to_run = route_action(action=action)
 
@@ -92,7 +77,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     player.enhanced = enhanced
 
     # Get target from the database
-    target_query = get_player_info(table=player_table, player_token=target_token)
+    target_query = get_player(table=player_table, player_token=target_token)
     if "player_data" in target_query:
         # Deal with string vs. list
         if type(target_query["player_data"]["status_effects"]) != list:
@@ -122,11 +107,11 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
 
     # Update player and target information if it needs updating
     if player_updates:
-        update_player_info(
+        update_player(
             table=player_table, player_token=id_token, update_map=player_updates
         )
     if target_updates:
-        update_player_info(
+        update_player(
             table=player_table, player_token=target_token, update_map=target_updates
         )
 
@@ -155,3 +140,33 @@ def route_action(action: str) -> Callable:
     else:
         # TODO: Implement fuzzy matching
         return unknown_action
+
+
+def reset_characters(table: dynamodb.Table) -> Dict:
+    """
+    Function to reset the characters in table
+
+    :param table: DynamoDB table object
+    :return: Response to return
+    """
+    with open(
+        Path(__file__).resolve().parent / "default_players.json", "r"
+    ) as default_file:
+        default_characters = json.load(default_file)
+
+    message = list()
+    for default_character in default_characters:
+        player = Player(**default_character)
+        create_player(table=table, player=player)
+        message.append(f"Reset {player.name}")
+
+    # Return the results
+    action_results = json.dumps({"Player": asdict(player), "message": message})
+
+    result = {
+        "statusCode": 200,
+        "body": action_results,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+    }
+
+    return result

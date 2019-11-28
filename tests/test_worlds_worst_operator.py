@@ -13,12 +13,10 @@ from dataclasses import dataclass, asdict
 from unittest import mock
 from pytest_dynamodb import factories
 
-from worlds_worst_serverless.worlds_worst_operator import handler
+from worlds_worst_serverless.worlds_worst_operator import operator
 
 my_dynamodb_proc = factories.dynamodb_proc(
-    dynamodb_dir="/Users/Nigel/dynamodb_local",
-    port=8002,
-    delay=False
+    dynamodb_dir="/Users/Nigel/dynamodb_local", port=8002, delay=False
 )
 dynamodb = factories.dynamodb("my_dynamodb_proc")
 
@@ -66,7 +64,7 @@ def player():
         "ex": 0,
         "status_effects": [],
         "action": "attack",
-        "enhanced": False
+        "enhanced": False,
     }
 
 
@@ -83,14 +81,13 @@ def mock_event(player: dict) -> dict:
             "Player": player,
             "playerId": "player_hash",
             "action": "attack",
-            "enhanced": False
+            "enhanced": False,
         }
     }
 
 
 @pytest.fixture
-def dynamodb_config(dynamodb: boto3.resource,
-                    player: dict) -> boto3.resource:
+def dynamodb_config(dynamodb: boto3.resource, player: dict) -> boto3.resource:
     """
     Fixture to return a dynamodb resource initialized with a table
 
@@ -101,32 +98,14 @@ def dynamodb_config(dynamodb: boto3.resource,
     """
     # create a table
     table = dynamodb.create_table(
-        TableName='Table',
-        AttributeDefinitions=[
-            {
-                'AttributeName': 'playerId',
-                'AttributeType': 'S'
-            }
-        ],
-        KeySchema=[
-            {
-                "AttributeName": 'playerId',
-                "KeyType": 'HASH'
-            }
-        ],
-        ProvisionedThroughput={
-            'ReadCapacityUnits': 1,
-            'WriteCapacityUnits': 1
-        }
+        TableName="Table",
+        AttributeDefinitions=[{"AttributeName": "playerId", "AttributeType": "S"}],
+        KeySchema=[{"AttributeName": "playerId", "KeyType": "HASH"}],
+        ProvisionedThroughput={"ReadCapacityUnits": 1, "WriteCapacityUnits": 1},
     )
 
     # Put player into DB
-    table.put_item(
-        Item={
-            'playerId': 'player_hash',
-            'player_data': player
-        },
-    )
+    table.put_item(Item={"playerId": "player_hash", "player_data": player})
 
     return table
 
@@ -140,47 +119,25 @@ def test_dynamodb(dynamodb: boto3.resource):
     """
     # create a table
     table = dynamodb.create_table(
-        TableName='Test',
-        KeySchema=[
-            {
-                'AttributeName': 'playerId',
-                'KeyType': 'HASH'
-            }
-        ],
-        AttributeDefinitions=[
-            {
-                'AttributeName': 'playerId',
-                'AttributeType': 'S'
-            }
-        ],
-        ProvisionedThroughput={
-            'ReadCapacityUnits': 1,
-            'WriteCapacityUnits': 1
-        }
+        TableName="Test",
+        KeySchema=[{"AttributeName": "playerId", "KeyType": "HASH"}],
+        AttributeDefinitions=[{"AttributeName": "playerId", "AttributeType": "S"}],
+        ProvisionedThroughput={"ReadCapacityUnits": 1, "WriteCapacityUnits": 1},
     )
 
     _id = str(uuid.uuid4())
 
     # put an item into db
-    table.put_item(
-        Item={
-            'playerId': _id,
-            'test_key': 'test_value'
-        },
-    )
+    table.put_item(Item={"playerId": _id, "test_key": "test_value"})
 
     # get the item
-    item = table.get_item(
-        Key={
-            'playerId': _id,
-        }
-    )
+    item = table.get_item(Key={"playerId": _id})
 
     # check the content of the item
-    assert item['Item']['test_key'] == 'test_value'
+    assert item["Item"]["test_key"] == "test_value"
 
 
-def test_get_player_info(player: dict, dynamodb_config: boto3.resource) -> None:
+def test_get_player(player: dict, dynamodb_config: boto3.resource) -> None:
     """
     Test that a good event sent invokes the proper response
 
@@ -188,26 +145,23 @@ def test_get_player_info(player: dict, dynamodb_config: boto3.resource) -> None:
     :param dynamodb_config: boto3 resource with our tables
     """
     # Arrange - get entries from local mock database
-    db_entry = dynamodb_config.get_item(
-        Key={
-            'playerId': 'player_hash',
-        }
-    )
-    db_item = db_entry['Item']
-    del db_item['playerId']
+    db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    db_item = db_entry["Item"]
+    del db_item["playerId"]
     player_from_db = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
-    expected_result = {'player_data': player}
+    expected_result = {"player_data": player}
 
     # Act
-    test_result = handler.get_player_info(table=dynamodb_config,
-                                          player_token='player_hash')
+    test_result = operator.get_player(
+        table=dynamodb_config, player_token="player_hash"
+    )
 
     # Assert
     assert test_result == expected_result
     assert test_result == player_from_db
 
 
-def test_update_player_info(player: dict, dynamodb_config: boto3.resource) -> None:
+def test_update_player(player: dict, dynamodb_config: boto3.resource) -> None:
     """
     Test that a good event sent invokes the proper response
 
@@ -215,38 +169,32 @@ def test_update_player_info(player: dict, dynamodb_config: boto3.resource) -> No
     :param dynamodb_config: boto3 resource with our tables
     """
     # Arrange - get entries from local mock database
-    original_db_entry = dynamodb_config.get_item(
-        Key={
-            'playerId': 'player_hash',
-        }
+    original_db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    db_item = original_db_entry["Item"]
+    del db_item["playerId"]
+    original_player_from_db = json.loads(
+        json.dumps(db_item, indent=4, cls=DecimalEncoder)
     )
-    db_item = original_db_entry['Item']
-    del db_item['playerId']
-    original_player_from_db = json.loads(json.dumps(db_item, indent=4,
-                                                    cls=DecimalEncoder))
 
     fields_to_update = dict()
-    fields_to_update['hit_points'] = 400
+    fields_to_update["hit_points"] = 400
 
     # Act
-    test_result = handler.update_player_info(table=dynamodb_config,
-                                             player_token='player_hash',
-                                             update_map=fields_to_update)
-
-    updated_db_entry = dynamodb_config.get_item(
-        Key={
-            'playerId': 'player_hash',
-        }
+    test_result = operator.update_player(
+        table=dynamodb_config, player_token="player_hash", update_map=fields_to_update
     )
-    db_item = updated_db_entry['Item']
-    del db_item['playerId']
-    updated_player_from_db = json.loads(json.dumps(db_item, indent=4,
-                                                   cls=DecimalEncoder))
+
+    updated_db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    db_item = updated_db_entry["Item"]
+    del db_item["playerId"]
+    updated_player_from_db = json.loads(
+        json.dumps(db_item, indent=4, cls=DecimalEncoder)
+    )
 
     # Assert
     assert original_player_from_db != updated_player_from_db
-    assert updated_player_from_db['player_data']['hit_points'] == 400
-    assert test_result['ResponseMetadata']['HTTPStatusCode'] == 200
+    assert updated_player_from_db["player_data"]["hit_points"] == 400
+    assert test_result["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 
 def test_do_combat(player: dict) -> None:
@@ -257,19 +205,19 @@ def test_do_combat(player: dict) -> None:
     """
     # Arrange
     input_player = Player(**player)
-    expected_player_updates = {
-        "hit_points": 400,
-        "ex": 150
-    }
+    expected_player_updates = {"hit_points": 400, "ex": 150}
     expected_target_updates = expected_player_updates
-    expected_message = ['Truckthunders uses attack!',
-                        'Truckthunders uses attack!',
-                        'Truckthunders and Truckthunders tie.',
-                        'Truckthunders has 400 HP left.']
+    expected_message = [
+        "Truckthunders uses attack!",
+        "Truckthunders uses attack!",
+        "Truckthunders and Truckthunders tie.",
+        "Truckthunders has 400 HP left.",
+    ]
 
     # Act
-    updated_player, updated_target, player_updates, target_updates, message = \
-        handler.do_combat(input_player, input_player)
+    updated_player, updated_target, player_updates, target_updates, message = operator.do_combat(
+        input_player, input_player
+    )
 
     # Assert
     assert input_player != updated_player
@@ -278,8 +226,9 @@ def test_do_combat(player: dict) -> None:
     assert message == expected_message
 
 
-def test_route_tasks_and_response(mocker: mock, mock_event: dict,
-                                  player: dict, dynamodb_config: boto3.resource) -> None:
+def test_route_tasks_and_response(
+    mocker: mock, mock_event: dict, player: dict, dynamodb_config: boto3.resource
+) -> None:
     """
     Test that a combat action proceeds correctly and returns the right response
 
@@ -290,32 +239,45 @@ def test_route_tasks_and_response(mocker: mock, mock_event: dict,
     """
     # Arrange
     # Mock all the things we already tested
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.random.choice",
-                 return_value='block')
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.boto3.resource",
-                 return_value=dynamodb_config)
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.os.environ",
-                 return_value="Table")
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
-                 ".get_player_info", return_value={'player_data': player})
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
-                 ".update_player_info", return_value={})
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.random.choice",
+        return_value="block",
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.boto3.resource",
+        return_value=dynamodb_config,
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.os.environ",
+        return_value="Table",
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.get_player",
+        return_value={"player_data": player},
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.database_ops.get_player",
+        return_value={"player_data": player},
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.update_player",
+        return_value={},
+    )
 
     # Expect player to get hit for 100 damage and get 100 ex
     expected_player = Player(**player)
     expected_player.hit_points = 400
     expected_player.ex = 100
 
-    expected_message = ["Truckthunders uses attack!",
-                        "Truckthunders uses block!",
-                        "Truckthunders wins.",
-                        "Truckthunders has 500 HP left."]
+    expected_message = [
+        "Truckthunders uses attack!",
+        "Truckthunders uses block!",
+        "Truckthunders wins.",
+        "Truckthunders has 500 HP left.",
+    ]
 
     expected_action_results = json.dumps(
-        {
-            "Player": asdict(expected_player),
-            "message": expected_message
-        }
+        {"Player": asdict(expected_player), "message": expected_message}
     )
 
     expected_response = {
@@ -325,14 +287,15 @@ def test_route_tasks_and_response(mocker: mock, mock_event: dict,
     }
 
     # Act
-    response = handler.route_tasks_and_response(mock_event, mock_event)
+    response = operator.route_tasks_and_response(mock_event, mock_event)
 
     # Assert
     assert response == expected_response
 
 
-def test_route_bad_id(mocker: mock, mock_event: dict,
-                      dynamodb_config: boto3.resource) -> None:
+def test_route_bad_id(
+    mocker: mock, mock_event: dict, dynamodb_config: boto3.resource
+) -> None:
     """
     Test that the operator router returns 401 Unauthorized if the player ID is wrong
 
@@ -342,29 +305,73 @@ def test_route_bad_id(mocker: mock, mock_event: dict,
     """
     # Arrange
     # Mock all the things we already tested
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.random.choice",
-                 return_value='block')
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.boto3.resource",
-                 return_value=dynamodb_config)
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.os.environ",
-                 return_value="Table")
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
-                 ".get_player_info",
-                 return_value={"Error": "Queried player does not exist."})
-    mock_event["body"]["playerId"] = 'wrong_key'
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.random.choice",
+        return_value="block",
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.boto3.resource",
+        return_value=dynamodb_config,
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator.os.environ",
+        return_value="Table",
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.operator" ".get_player",
+        return_value={"Error": "Queried player does not exist."},
+    )
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.database_ops.get_player",
+        return_value={"Error": "Queried player does not exist."},
+    )
+    mock_event["body"]["playerId"] = "wrong_key"
 
     expected_response = {
         "statusCode": 401,
         "body": json.dumps({"Error": "Player does not exist in database"}),
-        "message": json.dumps('Time to reroll.'),
+        "message": json.dumps("Time to reroll."),
         "headers": {"Access-Control-Allow-Origin": "*"},
     }
 
     # Act
-    response = handler.route_tasks_and_response(mock_event, mock_event)
+    response = operator.route_tasks_and_response(mock_event, mock_event)
 
     # Assert
     assert response == expected_response
+
+
+def test_reset_characters(
+    mock_event: dict, player: dict, dynamodb_config: boto3.resource
+) -> None:
+    """
+    Test that a reset request loads the default players and resets the database
+
+    :param mock_event: Mock AWS lambda event dict
+    :param player: Input character dictionary
+    :param dynamodb_config: boto3 config with our resource
+    """
+    # Arrange
+    expected_player = Player(**player)
+
+    expected_message = []
+
+    expected_action_results = json.dumps(
+        {"Player": asdict(expected_player), "message": expected_message}
+    )
+
+    expected_response = {
+        "statusCode": 200,
+        "body": expected_action_results,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+    }
+
+    # Act
+    response = operator.reset_characters(table=dynamodb_config)
+    response = json.loads(response['body'])
+
+    # Assert
+    assert len(response['message']) == 8
 
 
 """ TODO: Make this not FUBAR
@@ -381,17 +388,17 @@ def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
     
     # Arrange
     # Mock all the things we already tested
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.random.choice",
+    mocker.patch("worlds_worst_serverless.worlds_worst_operator.operator.random.choice",
                  return_value='block')
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.boto3.resource",
+    mocker.patch("worlds_worst_serverless.worlds_worst_operator.operator.boto3.resource",
                  return_value=dynamodb_config)
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler.os.environ",
+    mocker.patch("worlds_worst_serverless.worlds_worst_operator.operator.os.environ",
                  return_value="Table")
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
-                 ".get_player_info",
+    mocker.patch("worlds_worst_serverless.worlds_worst_operator.operator"
+                 ".get_player",
                  return_value={'player_data': player})
-    mocker.patch("worlds_worst_serverless.worlds_worst_operator.handler"
-                 ".update_player_info", return_value={})
+    mocker.patch("worlds_worst_serverless.worlds_worst_operator.operator"
+                 ".update_player", return_value={})
 
     altered_mock_event = copy.deepcopy(mock_event)
     altered_mock_event["body"]["Player"]["name"] = 'Dumb McDumbface'
@@ -403,7 +410,7 @@ def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
         }
 
     # Act
-    response = handler.route_tasks_and_response(altered_mock_event, mock_event)
+    response = operator.route_tasks_and_response(altered_mock_event, mock_event)
 
     # Assert
     assert response == expected_response

@@ -1,0 +1,90 @@
+[
+  {
+    "name": "TruckThunders",
+    "character_class": "Dreamer",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "Crunchbucket",
+    "character_class": "Cloistered",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "deez_nutz",
+    "character_class": "Chosen",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "Moira_IRL",
+    "character_class": "Chemist",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "Gilgamesh",
+    "character_class": "Creator",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "xX_L00t_Xx",
+    "character_class": "Hacker",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "LeonardoDiCaprio",
+    "character_class": "Architect",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  },
+  {
+    "name": "Symmetra",
+    "character_class": "Photonic",
+    "max_hit_points": 500,
+    "max_ex": 1000,
+    "hit_points": 500,
+    "ex": 0,
+    "status_effects": [],
+    "action": "attack",
+    "enhanced":  false
+  }
+]

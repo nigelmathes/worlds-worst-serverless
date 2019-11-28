@@ -9,7 +9,7 @@ try:
     from database_ops import get_player_info, create_player, update_player_info
     from player_data import Player
 except ImportError:
-    from .database_ops import get_player_info, create_player, update_player_info
+    from .database_ops import get_player, create_player, update_player
     from .player_data import Player
 
 
@@ -82,6 +82,18 @@ def do_combat(player: Player, target: Player) -> ActionResponse:
         message.append(f"{target.name} has {updated_target.hit_points} HP left.")
 
     return updated_player, updated_target, player_updates, target_updates, message
+
+
+def change_character(player: Player, updated_player: Player) -> Dict:
+    """
+
+    :param player: The original player, before actions were taken
+    :param updated_player: The updated player, after actions were taken
+
+    :return: Dictionary mapping Player fields to values which will be updated
+    """
+    pass
+    # return updated_player, updated_target, player_updates, target_updates, message
 
 
 def create_update_fields(player: Player, updated_player: Player) -> Dict:
