@@ -14,6 +14,7 @@ from unittest import mock
 from pytest_dynamodb import factories
 
 from worlds_worst_serverless.worlds_worst_operator import operator
+from worlds_worst_serverless.worlds_worst_operator import database_ops
 
 my_dynamodb_proc = factories.dynamodb_proc(
     dynamodb_dir="/Users/Nigel/dynamodb_local", port=8002, delay=False
@@ -107,6 +108,9 @@ def dynamodb_config(dynamodb: boto3.resource, player: dict) -> boto3.resource:
     # Put player into DB
     table.put_item(Item={"playerId": "player_hash", "player_data": player})
 
+    # Put target into DB
+    table.put_item(Item={"playerId": "target_hash", "player_data": player})
+
     return table
 
 
@@ -152,7 +156,7 @@ def test_get_player(player: dict, dynamodb_config: boto3.resource) -> None:
     expected_result = {"player_data": player}
 
     # Act
-    test_result = operator.get_player(
+    test_result = database_ops.get_player(
         table=dynamodb_config, player_token="player_hash"
     )
 
@@ -197,13 +201,20 @@ def test_update_player(player: dict, dynamodb_config: boto3.resource) -> None:
     assert test_result["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 
-def test_do_combat(player: dict) -> None:
+def test_do_combat(mocker: mock, player: dict, dynamodb_config: boto3.resource) -> None:
     """
     Test that a good combat request gets properly sent to our lambda function
 
+    :param mocker: Pytest mock fixture
     :param player: Input character dictionary
+    :param dynamodb_config: boto3 resource with our tables
     """
     # Arrange
+    mocker.patch(
+        "worlds_worst_serverless.worlds_worst_operator.actions.random.choice",
+        return_value="attack",
+    )
+
     input_player = Player(**player)
     expected_player_updates = {"hit_points": 400, "ex": 150}
     expected_target_updates = expected_player_updates
@@ -216,7 +227,7 @@ def test_do_combat(player: dict) -> None:
 
     # Act
     updated_player, updated_target, player_updates, target_updates, message = operator.do_combat(
-        input_player, input_player
+        player=input_player, table=dynamodb_config
     )
 
     # Assert
@@ -240,7 +251,7 @@ def test_route_tasks_and_response(
     # Arrange
     # Mock all the things we already tested
     mocker.patch(
-        "worlds_worst_serverless.worlds_worst_operator.operator.random.choice",
+        "worlds_worst_serverless.worlds_worst_operator.actions.random.choice",
         return_value="block",
     )
     mocker.patch(
@@ -252,7 +263,7 @@ def test_route_tasks_and_response(
         return_value="Table",
     )
     mocker.patch(
-        "worlds_worst_serverless.worlds_worst_operator.operator.get_player",
+        "worlds_worst_serverless.worlds_worst_operator.actions.get_player",
         return_value={"player_data": player},
     )
     mocker.patch(
@@ -306,7 +317,7 @@ def test_route_bad_id(
     # Arrange
     # Mock all the things we already tested
     mocker.patch(
-        "worlds_worst_serverless.worlds_worst_operator.operator.random.choice",
+        "worlds_worst_serverless.worlds_worst_operator.actions.random.choice",
         return_value="block",
     )
     mocker.patch(
@@ -318,7 +329,7 @@ def test_route_bad_id(
         return_value="Table",
     )
     mocker.patch(
-        "worlds_worst_serverless.worlds_worst_operator.operator" ".get_player",
+        "worlds_worst_serverless.worlds_worst_operator.actions" ".get_player",
         return_value={"Error": "Queried player does not exist."},
     )
     mocker.patch(

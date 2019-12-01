@@ -5,7 +5,6 @@ except ImportError:
 
 import json
 import os
-import random
 from pathlib import Path
 
 from dataclasses import asdict
@@ -14,11 +13,11 @@ from typing import Dict, Any, Callable
 import boto3
 
 try:
-    from database_ops import get_player, create_player, update_player, verify_player
+    from database_ops import create_player, update_player, verify_player
     from player_data import Player
     from actions import ACTIONS_MAP, unknown_action, do_combat
 except ImportError:
-    from .database_ops import get_player, create_player, update_player, verify_player
+    from .database_ops import create_player, update_player, verify_player
     from .player_data import Player
     from .actions import ACTIONS_MAP, unknown_action, do_combat
 
@@ -69,40 +68,16 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         # Contains the return dict with a 401 statusCode
         return player_data
 
-    # If you get here, auth is good. Take action based on player ID token and action
+    # If you get here, auth is good. Take action based on player info and action
     function_to_run = route_action(action=action)
 
     # Give the player the input action and its enhanced flag
     player.action = action
     player.enhanced = enhanced
 
-    # Get target from the database
-    target_query = get_player(table=player_table, player_token=target_token)
-    if "player_data" in target_query:
-        # Deal with string vs. list
-        if type(target_query["player_data"]["status_effects"]) != list:
-            target_query["player_data"]["status_effects"] = json.loads(
-                target_query["player_data"]["status_effects"]
-            )
-        target = Player(**target_query["player_data"])
-    else:
-        # Return a 401 error if the id does not match an id in the database
-        # User is not authorized
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"Error": "Target does not exist in database"}),
-            "message": json.dumps("This is embarrassing. Could not find opponent."),
-            "headers": {"Access-Control-Allow-Origin": "*"},
-        }
-
-    # Make the target attack
-    possible_attacks = ["attack", "area", "block", "disrupt", "dodge"]
-    target.action = random.choice(possible_attacks)
-    # target.enhanced = random.choice([True, False])
-
     # Perform the action
     player, target, player_updates, target_updates, message = function_to_run(
-        player, target
+        player=player, table=player_table
     )
 
     # Update player and target information if it needs updating

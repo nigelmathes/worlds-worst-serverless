@@ -1,4 +1,6 @@
+import copy
 import json
+import random
 
 from dataclasses import asdict, fields
 from typing import Dict, Tuple, List
@@ -6,7 +8,7 @@ from typing import Dict, Tuple, List
 import boto3
 
 try:
-    from database_ops import get_player_info, create_player, update_player_info
+    from database_ops import get_player, create_player, update_player
     from player_data import Player
 except ImportError:
     from .database_ops import get_player, create_player, update_player
@@ -14,6 +16,7 @@ except ImportError:
 
 
 lambda_client = boto3.client("lambda", region_name="us-east-1")
+dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 ActionResponse = Tuple[Player, Player, Dict, Dict, List]
 
 
@@ -28,14 +31,35 @@ def unknown_action(player: Player, target: Player) -> ActionResponse:
     return player, target, dict(), dict(), message
 
 
-def do_combat(player: Player, target: Player) -> ActionResponse:
+def do_combat(player: Player, table: dynamodb.Table) -> ActionResponse:
     """
     Function to do combat based on a Player
 
     :param player: Dataclass holding player data
-    :param target: Dataclass holding target player data
+    :param table: DynamoDB table object
     :return: Updated Player dataclass and dict of fields to update, and a message
     """
+    # Get target from the database
+    target_token = "target_hash"
+    target_query = get_player(table=table, player_token=target_token)
+    if "player_data" in target_query:
+        # Deal with string vs. list
+        if type(target_query["player_data"]["status_effects"]) != list:
+            target_query["player_data"]["status_effects"] = json.loads(
+                target_query["player_data"]["status_effects"]
+            )
+        target = Player(**target_query["player_data"])
+    else:
+        # Return a 401 error if the id does not match an id in the database
+        # User is not authorized
+        message = ["ERROR. This is embarrassing. Could not find opponent in database."]
+        return player, player, dict(), dict(), message
+
+    # Make the target attack
+    possible_attacks = ["attack", "area", "block", "disrupt", "dodge"]
+    target.action = random.choice(possible_attacks)
+    # target.enhanced = random.choice([True, False])
+
     arn = (
         "arn:aws:lambda:us-east-1:437610822210:function:"
         "worlds-worst-combat-dev-do_combat"
@@ -84,16 +108,24 @@ def do_combat(player: Player, target: Player) -> ActionResponse:
     return updated_player, updated_target, player_updates, target_updates, message
 
 
-def change_character(player: Player, updated_player: Player) -> Dict:
+def change_class(player: Player, new_class: str) -> ActionResponse:
     """
+    Function to change a player's class
 
     :param player: The original player, before actions were taken
-    :param updated_player: The updated player, after actions were taken
+    :param new_class: The class to change into
 
-    :return: Dictionary mapping Player fields to values which will be updated
+    :return: Updated Player dataclass and dict of fields to update, and a message
     """
-    pass
-    # return updated_player, updated_target, player_updates, target_updates, message
+    old_player = copy.deepcopy(player)
+    player.character_class = new_class
+
+    player_updates = create_update_fields(old_player, player)
+
+    message = [f"Changed class from {old_player.character_class} to"
+               f" {player.character_class}"]
+
+    return player, player, player_updates, dict(), message
 
 
 def create_update_fields(player: Player, updated_player: Player) -> Dict:
@@ -133,4 +165,6 @@ ACTIONS_MAP = {
     "block": do_combat,
     "disrupt": do_combat,
     "dodge": do_combat,
+    "change character": change_class,
+    "change class": change_class
 }
