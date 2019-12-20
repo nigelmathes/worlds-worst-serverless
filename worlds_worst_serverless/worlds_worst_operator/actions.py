@@ -120,7 +120,9 @@ def change_class(player: Player, new_class: str) -> ActionResponse:
     old_player = copy.deepcopy(player)
     player.character_class = new_class
 
-    player_updates = create_update_fields(old_player, player)
+    # TODO: Un-comment this once I'm confident it works
+    #player_updates = create_update_fields(old_player, player)
+    player_updates = {}
 
     message = [f"Changed class from {old_player.character_class} to"
                f" {player.character_class}"]

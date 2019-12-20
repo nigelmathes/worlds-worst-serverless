@@ -385,6 +385,20 @@ def test_reset_characters(
     assert len(response['message']) == 8
 
 
+def test_route_action() -> None:
+    """
+    Test that the route_action method's fuzzy matching works
+    """
+    # Arrange
+    expected_action = operator.do_combat
+
+    # Act
+    routed_action = operator.route_action("attac")
+
+    # Assert
+    assert routed_action == expected_action
+
+
 """ TODO: Make this not FUBAR
 def test_route_bad_character(mocker: mock, mock_event: dict, player: dict,
                              dynamodb_config: boto3.resource) -> None:

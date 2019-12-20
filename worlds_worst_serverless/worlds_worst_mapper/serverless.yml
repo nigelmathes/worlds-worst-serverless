@@ -1,0 +1,35 @@
+service: worlds-worst-mapper
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.7
+  iamRoleStatements: # permissions for all of your functions can be set here
+    - Effect: Allow
+      Action: # Gives permission to Lambda Invoke
+        - lambda:InvokeFunction
+      Resource:
+        - 'arn:aws:lambda:us-east-1:*:*'
+
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+    slim: true
+
+functions:
+  map:
+    handler: mapper.get_matching_action
+    timeout: 30
+    events:
+      - http:
+          path: mapper
+          method: post
+          cors: true
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**

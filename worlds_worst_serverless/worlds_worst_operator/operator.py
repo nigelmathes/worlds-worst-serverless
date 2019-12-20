@@ -11,6 +11,7 @@ from dataclasses import asdict
 from typing import Dict, Any, Callable
 
 import boto3
+from fuzzywuzzy import process
 
 try:
     from database_ops import create_player, update_player, verify_player
@@ -113,8 +114,11 @@ def route_action(action: str) -> Callable:
         # Perfect match
         return ACTIONS_MAP[action]
     else:
-        # TODO: Implement fuzzy matching
-        return unknown_action
+        # Fuzzy match
+        possible_actions = ACTIONS_MAP.keys()
+        matched_action = process.extractOne(action, possible_actions)
+
+        return ACTIONS_MAP[matched_action[0]]
 
 
 def reset_characters(table: dynamodb.Table) -> Dict:
