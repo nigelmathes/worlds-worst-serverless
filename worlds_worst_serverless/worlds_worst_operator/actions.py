@@ -117,17 +117,15 @@ def change_class(player: Player, new_class: str) -> ActionResponse:
 
     :return: Updated Player dataclass and dict of fields to update, and a message
     """
-    old_player = copy.deepcopy(player)
-    player.character_class = new_class
+    new_player = copy.deepcopy(player)
+    new_player.character_class = new_class
 
-    # TODO: Un-comment this once I'm confident it works
-    #player_updates = create_update_fields(old_player, player)
-    player_updates = {}
+    player_updates = create_update_fields(player, new_player)
 
-    message = [f"Changed class from {old_player.character_class} to"
-               f" {player.character_class}"]
+    message = [f"Changed class from {player.character_class} to"
+               f" {new_player.character_class}"]
 
-    return player, player, player_updates, dict(), message
+    return new_player, new_player, player_updates, dict(), message
 
 
 def create_update_fields(player: Player, updated_player: Player) -> Dict:

@@ -15,9 +15,10 @@ from pytest_dynamodb import factories
 
 from worlds_worst_serverless.worlds_worst_operator import operator
 from worlds_worst_serverless.worlds_worst_operator import database_ops
+from worlds_worst_serverless.worlds_worst_operator import actions
 
 my_dynamodb_proc = factories.dynamodb_proc(
-    dynamodb_dir="/Users/Nigel/dynamodb_local", port=8002, delay=False
+    dynamodb_dir="/Users/nmathes/dynamodb_local", port=8002, delay=False
 )
 dynamodb = factories.dynamodb("my_dynamodb_proc")
 
@@ -199,6 +200,33 @@ def test_update_player(player: dict, dynamodb_config: boto3.resource) -> None:
     assert original_player_from_db != updated_player_from_db
     assert updated_player_from_db["player_data"]["hit_points"] == 400
     assert test_result["ResponseMetadata"]["HTTPStatusCode"] == 200
+
+
+def test_change_class(player: dict, dynamodb_config: boto3.resource) -> None:
+    """
+    Test that we can change character class
+
+    :param player: Input character dictionary
+    :param dynamodb_config: boto3 resource with our tables
+    """
+    # Arrange - get entries from local mock database
+    db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    db_item = db_entry["Item"]
+    player_from_db = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
+
+    # Act
+    updated_player, _, player_updates, _, message = actions.change_class(
+        player=Player(**player), new_class='hacker'
+    )
+
+    #db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    #db_item = db_entry["Item"]
+    #updated_player = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
+
+    # Assert
+    assert player_from_db != updated_player
+    assert player_updates == {'character_class': 'hacker'}
+    assert message == ['Changed class from Dreamer to hacker']
 
 
 def test_do_combat(mocker: mock, player: dict, dynamodb_config: boto3.resource) -> None:
@@ -390,13 +418,15 @@ def test_route_action() -> None:
     Test that the route_action method's fuzzy matching works
     """
     # Arrange
-    expected_action = operator.do_combat
+    expected_action = "attack"
+    expected_function = operator.do_combat
 
     # Act
-    routed_action = operator.route_action("attac")
+    routed_action, function_to_run = operator.route_action("attac")
 
     # Assert
     assert routed_action == expected_action
+    assert function_to_run == expected_function
 
 
 """ TODO: Make this not FUBAR

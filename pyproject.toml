@@ -12,17 +12,17 @@ boto3 = "^1.9"
 uvicorn = "^0.8.6"
 gpt-2-simple = "^0.6.0"
 tensorflow = "1.13.1"
-pytest-dynamodb = "^1.2"
-pytest-mock = "^1.11"
 fuzzywuzzy = "^0.17.0"
 python-Levenshtein = "^0.12.0"
 
 [tool.poetry.dev-dependencies]
-black = {version = "^18.3-alpha.0", allows-prereleases = true}
+black = {version = "^18.3-alpha.0", allow-prereleases = true}
 pytest = "^5.0"
 tox = "^3.13"
 pytest-cov = "^2.7"
 codecov = "^2.0"
+pytest-mock = "^1.13.0"
+pytest_dynamodb = "^2.0.0"
 
 [tool.tox]
 legacy_tox_ini = """

@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from dataclasses import asdict
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, Tuple
 
 import boto3
 from fuzzywuzzy import process
@@ -70,10 +70,10 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         return player_data
 
     # If you get here, auth is good. Take action based on player info and action
-    function_to_run = route_action(action=action)
+    action_to_do, function_to_run = route_action(action=action)
 
     # Give the player the input action and its enhanced flag
-    player.action = action
+    player.action = action_to_do
     player.enhanced = enhanced
 
     # Perform the action
@@ -102,7 +102,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     return result
 
 
-def route_action(action: str) -> Callable:
+def route_action(action: str) -> Tuple[str, Callable]:
     """
     Function to take in an action and route the command to the appropriate functions
 
@@ -112,13 +112,13 @@ def route_action(action: str) -> Callable:
     """
     if action in ACTIONS_MAP:
         # Perfect match
-        return ACTIONS_MAP[action]
+        return action, ACTIONS_MAP[action]
     else:
         # Fuzzy match
         possible_actions = ACTIONS_MAP.keys()
-        matched_action = process.extractOne(action, possible_actions)
+        matched_action = process.extractOne(action, possible_actions)[0]
 
-        return ACTIONS_MAP[matched_action[0]]
+        return matched_action, ACTIONS_MAP[matched_action]
 
 
 def reset_characters(table: dynamodb.Table) -> Dict:
