@@ -1,7 +1,7 @@
 [
   {
     "name": "TruckThunders",
-    "character_class": "Dreamer",
+    "character_class": "dreamer",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -12,7 +12,7 @@
   },
   {
     "name": "Crunchbucket",
-    "character_class": "Cloistered",
+    "character_class": "cloistered",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -23,7 +23,7 @@
   },
   {
     "name": "deez_nutz",
-    "character_class": "Chosen",
+    "character_class": "chosen",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -34,7 +34,7 @@
   },
   {
     "name": "Moira_IRL",
-    "character_class": "Chemist",
+    "character_class": "chemist",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -45,7 +45,7 @@
   },
   {
     "name": "Gilgamesh",
-    "character_class": "Creator",
+    "character_class": "creator",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -56,7 +56,7 @@
   },
   {
     "name": "xX_L00t_Xx",
-    "character_class": "Hacker",
+    "character_class": "hacker",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -67,7 +67,7 @@
   },
   {
     "name": "LeonardoDiCaprio",
-    "character_class": "Architect",
+    "character_class": "architect",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,
@@ -78,7 +78,7 @@
   },
   {
     "name": "Symmetra",
-    "character_class": "Photonic",
+    "character_class": "photonic",
     "max_hit_points": 500,
     "max_ex": 1000,
     "hit_points": 500,

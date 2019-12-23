@@ -77,9 +77,7 @@ def create_player(table: dynamodb.Table, player: Player) -> Dict:
     return response
 
 
-def update_player(
-    table: dynamodb.Table, player_token: str, update_map: Dict
-) -> Dict:
+def update_player(table: dynamodb.Table, player_token: str, update_map: Dict) -> Dict:
     """
     Function to update player information in DynamoDB
 
@@ -132,9 +130,12 @@ def verify_player(table: dynamodb.Table, player_token: str) -> Tuple[Dict, bool]
     else:
         # Return a 401 error if the id does not match an id in the database
         # User is not authorized
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"Error": "Player does not exist in database"}),
-            "message": json.dumps("Time to reroll."),
-            "headers": {"Access-Control-Allow-Origin": "*"},
-        }, False
+        return (
+            {
+                "statusCode": 401,
+                "body": json.dumps({"Error": "Player does not exist in database"}),
+                "message": json.dumps("Time to reroll."),
+                "headers": {"Access-Control-Allow-Origin": "*"},
+            },
+            False,
+        )

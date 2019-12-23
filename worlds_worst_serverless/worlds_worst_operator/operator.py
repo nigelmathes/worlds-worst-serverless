@@ -55,7 +55,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
 
     # If action is reset, do the table reset and return here
-    if action == "reset":
+    if action == "/reset":
         result = reset_characters(table=player_table)
         # Contains return dict with a 200 statusCode
         return result

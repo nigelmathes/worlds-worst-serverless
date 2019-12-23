@@ -59,7 +59,7 @@ class Player:
 def player():
     return {
         "name": "Truckthunders",
-        "character_class": "Dreamer",
+        "character_class": "dreamer",
         "max_hit_points": 500,
         "max_ex": 1000,
         "hit_points": 500,
@@ -204,29 +204,76 @@ def test_update_player(player: dict, dynamodb_config: boto3.resource) -> None:
 
 def test_change_class(player: dict, dynamodb_config: boto3.resource) -> None:
     """
-    Test that we can change character class
+    Test that the change_class() function works
+
+    :param player: Input character dictionary
+    :param dynamodb_config: boto3 resource with our tables
+    """
+    # Arrange
+    expected_message = ["Changing class from dreamer to hacker.",
+                        "Resetting HP, EX and status for player and target."]
+    # Act
+    (
+        returned_player,
+        returned_target,
+        player_updates,
+        target_updates,
+        message
+    ) = actions.change_class(player=Player(**player), table=dynamodb_config)
+
+    # Assert
+    assert Player(**player) == returned_player
+    assert player_updates == {"character_class": "hacker",
+                              "hit_points": player["max_hit_points"],
+                              "ex": 0,
+                              "status_effects": []}
+    assert target_updates == {"hit_points": player["max_hit_points"],
+                              "ex": 0,
+                              "status_effects": []}
+    assert message == expected_message
+
+
+def test_change_class_db(player: dict, dynamodb_config: boto3.resource) -> None:
+    """
+    Test that we can change character class and the DB entry gets updated
 
     :param player: Input character dictionary
     :param dynamodb_config: boto3 resource with our tables
     """
     # Arrange - get entries from local mock database
-    db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
-    db_item = db_entry["Item"]
-    player_from_db = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
-
-    # Act
-    updated_player, _, player_updates, _, message = actions.change_class(
-        player=Player(**player), new_class='hacker'
+    orig_db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    orig_db_item = orig_db_entry["Item"]
+    orig_player_from_db = json.loads(
+        json.dumps(orig_db_item, indent=4, cls=DecimalEncoder)
     )
 
-    #db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
-    #db_item = db_entry["Item"]
-    #updated_player = json.loads(json.dumps(db_item, indent=4, cls=DecimalEncoder))
+    player["action"] = "change class hacker"
+
+    # Act
+    (
+        returned_player,
+        returned_target,
+        player_updates,
+        target_updates,
+        message
+    ) = actions.change_class(player=Player(**player), table=dynamodb_config)
+
+    database_ops.update_player(
+        table=dynamodb_config, player_token="player_hash", update_map=player_updates
+    )
+
+    db_entry = dynamodb_config.get_item(Key={"playerId": "player_hash"})
+    db_item = db_entry["Item"]
+    updated_player_from_db = json.loads(
+        json.dumps(db_item, indent=4, cls=DecimalEncoder)
+    )
 
     # Assert
-    assert player_from_db != updated_player
-    assert player_updates == {'character_class': 'hacker'}
-    assert message == ['Changed class from Dreamer to hacker']
+    assert orig_player_from_db != updated_player_from_db
+    assert orig_player_from_db["player_data"]["character_class"] == "dreamer"
+    assert updated_player_from_db["player_data"]["character_class"] == "hacker"
+    assert updated_player_from_db["player_data"]["hit_points"] == 500
+    assert updated_player_from_db["player_data"]["ex"] == 0
 
 
 def test_do_combat(mocker: mock, player: dict, dynamodb_config: boto3.resource) -> None:
@@ -407,10 +454,10 @@ def test_reset_characters(
 
     # Act
     response = operator.reset_characters(table=dynamodb_config)
-    response = json.loads(response['body'])
+    response = json.loads(response["body"])
 
     # Assert
-    assert len(response['message']) == 8
+    assert len(response["message"]) == 8
 
 
 def test_route_action() -> None:

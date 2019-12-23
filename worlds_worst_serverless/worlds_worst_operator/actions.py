@@ -1,19 +1,19 @@
-import copy
 import json
+import os
 import random
 
 from dataclasses import asdict, fields
 from typing import Dict, Tuple, List
 
 import boto3
+from fuzzywuzzy import process
 
 try:
-    from database_ops import get_player, create_player, update_player
+    from database_ops import get_player
     from player_data import Player
 except ImportError:
-    from .database_ops import get_player, create_player, update_player
+    from .database_ops import get_player
     from .player_data import Player
-
 
 lambda_client = boto3.client("lambda", region_name="us-east-1")
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
@@ -108,24 +108,87 @@ def do_combat(player: Player, table: dynamodb.Table) -> ActionResponse:
     return updated_player, updated_target, player_updates, target_updates, message
 
 
-def change_class(player: Player, new_class: str) -> ActionResponse:
+def change_class(player: Player, table: dynamodb.Table) -> ActionResponse:
     """
     Function to change a player's class
 
     :param player: The original player, before actions were taken
-    :param new_class: The class to change into
+    :param table: DynamoDB table object (unused)
 
     :return: Updated Player dataclass and dict of fields to update, and a message
     """
-    new_player = copy.deepcopy(player)
-    new_player.character_class = new_class
+    # Get target from the database
+    target_token = "target_hash"
+    target_query = get_player(table=table, player_token=target_token)
+    if "player_data" in target_query:
+        # Deal with string vs. list
+        if type(target_query["player_data"]["status_effects"]) != list:
+            target_query["player_data"]["status_effects"] = json.loads(
+                target_query["player_data"]["status_effects"]
+            )
+        target = Player(**target_query["player_data"])
+    else:
+        # Return a 401 error if the id does not match an id in the database
+        # User is not authorized
+        message = ["ERROR. This is embarrassing. Could not find opponent in database."]
+        return player, player, dict(), dict(), message
 
-    player_updates = create_update_fields(player, new_player)
+    possible_classes = [
+        "dreamer",
+        "cloistered",
+        "chosen",
+        "chemist",
+        "creator",
+        "hacker",
+        "architect",
+        "photonic",
+    ]
 
-    message = [f"Changed class from {player.character_class} to"
-               f" {new_player.character_class}"]
+    # Find the new class to play
+    if player.action in possible_classes:
+        matched_class = player.action
+    else:
+        # Fuzzy match
+        matched_class = process.extractOne(player.action, possible_classes)[0]
 
-    return new_player, new_player, player_updates, dict(), message
+    player_updates = dict()
+    target_updates = dict()
+
+    # Reset player and target HP to restart combat
+    player_updates["character_class"] = matched_class
+    player_updates["hit_points"] = player.max_hit_points
+    player_updates["ex"] = 0
+    player_updates["status_effects"] = list()
+    target_updates["hit_points"] = target.max_hit_points
+    target_updates["ex"] = 0
+    target_updates["status_effects"] = list()
+
+    message = [
+        f"Changing class from {player.character_class} to" f" {matched_class}.",
+        "Resetting HP, EX and status for player and target.",
+    ]
+
+    return player, target, player_updates, target_updates, message
+
+
+def change_class_message(player: Player, table: dynamodb.Table) -> ActionResponse:
+    """
+    Function to produce message response to 2-step change character
+
+    :param player: The original player, before actions were taken
+    :param table: DynamoDB table object (unused)
+
+    :return: Updated Player dataclass and dict of fields to update, and a message
+    """
+    message = [
+        "What class would you like to change to?\n"
+        "You may choose from: \n"
+        "Dreamer, Cloistered, Chosen, Chemist, Creator,"
+        " Hacker, Architect, or Photonic\n"
+        "Enter that choice now."
+    ]
+
+    return player, player, dict(), dict(), message
 
 
 def create_update_fields(player: Player, updated_player: Player) -> Dict:
@@ -165,6 +228,23 @@ ACTIONS_MAP = {
     "block": do_combat,
     "disrupt": do_combat,
     "dodge": do_combat,
-    "change character": change_class,
-    "change class": change_class
+    "change": change_class_message,
+    "change class": change_class_message,
+    "change character": change_class_message,
+    "change class dreamer": change_class,
+    "change class cloistered": change_class,
+    "change class chosen": change_class,
+    "change class chemist": change_class,
+    "change class creator": change_class,
+    "change class hacker": change_class,
+    "change class architect": change_class,
+    "change class photonic": change_class,
+    "dreamer": change_class,
+    "cloistered": change_class,
+    "chosen": change_class,
+    "chemist": change_class,
+    "creator": change_class,
+    "hacker": change_class,
+    "architect": change_class,
+    "photonic": change_class,
 }

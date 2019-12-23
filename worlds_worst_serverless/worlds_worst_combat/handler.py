@@ -178,6 +178,7 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         right_ability = find_ability(
             abilities, right_player.character_class, right_player.action
         )
+        print(f"Using abilities: {right_ability}, {left_ability}")
 
         # Apply the effects, with left getting priority
         apply_ability_effects(
@@ -186,6 +187,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         apply_ability_effects(
             ability=right_ability, target=left_player, self=right_player
         )
+
+        print(f"After applied effects: left_player hp = {left_player.hit_points},"
+              f" right_player hp={right_player.hit_points}")
 
         # If enhanced, apply the enhancements, with left getting priority
         if left_player.enhanced is True:
