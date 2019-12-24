@@ -63,9 +63,9 @@ def apply_status(
         status_effects = copy.copy(player1.status_effects)
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
-            player1, rules = getattr(combat_effects, "apply_" + status_effect[0])(
-                player=player1, rules=rules, left=True
-            )
+            player1, player2, rules = getattr(
+                combat_effects, "apply_" + status_effect[0]
+            )(self=player1, target=player2, rules=rules, left=True)
 
             # Decrease the duration of this status effect, which is a list like this:
             # ['name_of_status', duration], so we index to 1 to get duration
@@ -79,9 +79,9 @@ def apply_status(
         status_effects = copy.copy(player2.status_effects)
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
-            player2, rules = getattr(combat_effects, "apply_" + status_effect[0])(
-                player=player2, rules=rules, left=False
-            )
+            player2, player1, rules = getattr(
+                combat_effects, "apply_" + status_effect[0]
+            )(self=player2, target=player1, rules=rules, left=False)
 
             # Decrease the duration of this status effect, which is a list like this:
             # ['name_of_status', duration], so we index to 1 to get duration
@@ -140,6 +140,8 @@ def apply_enhancements(ability: dict, target: Player, self: Player) -> None:
     :param target: Target, as in enemy. The one being damaged, if damage is done
     :param self: Self, as in the user of the ability.
     """
+    self.status_effects.append(["enhancement_sickness", 1])
+
     for enhancement in ability["enhancements"]:
         if enhancement["target"] == "target":
             getattr(combat_effects, "inflict_" + enhancement["effect"])(

@@ -11,7 +11,7 @@ from worlds_worst_serverless.worlds_worst_combat import combat_effects
 def player1():
     return {
         "name": "Truckthunders",
-        "character_class": "Dreamer",
+        "character_class": "dreamer",
         "max_hit_points": 500,
         "max_ex": 1000,
         "hit_points": 500,
@@ -26,7 +26,7 @@ def player1():
 def player2():
     return {
         "name": "Crunchbucket",
-        "character_class": "Cloistered",
+        "character_class": "cloistered",
         "max_hit_points": 500,
         "max_ex": 1000,
         "hit_points": 500,
@@ -191,10 +191,11 @@ def test_multiple_status(mock_event: dict) -> None:
     assert combat_body_1["Player1"]["status_effects"] == [
         ["disorient", 4],
         ["poison", 11],
+        ["enhancement_sickness", 1],
     ]
     assert combat_body_1["Player2"]["status_effects"] == [["prone", 1]]
 
-    # Act - Do it again! Player1 re-applies prone
+    # Act - Do it again! Player1 tries to re-apply prone but is enhancement sick
     # Perform a round of combat
     combat_result_2 = do_combat(combat_result_1, combat_result_1)
     combat_body_2 = json.loads(combat_result_2["body"])
@@ -204,7 +205,7 @@ def test_multiple_status(mock_event: dict) -> None:
         ["disorient", 3],
         ["poison", 10],
     ]
-    assert combat_body_2["Player2"]["status_effects"] == [["prone", 1]]
+    assert combat_body_2["Player2"]["status_effects"] == []
 
     # Act - Do it again! Player1 does not re-apply prone
     combat_body_2["Player1"]["enhanced"] = "False"
@@ -229,11 +230,17 @@ def test_random_gun(mock_event: dict) -> None:
     :param mock_event: Mock AWS lambda event dict
     """
     # Arrange
-    mock_event["body"]["Player1"]["character_class"] = "Creator"
+    mock_event["body"]["Player1"]["character_class"] = "creator"
     mock_event["body"]["Player1"]["action"] = "attack"
     mock_event["body"]["Player1"]["enhanced"] = True
     mock_event["body"]["Player2"]["action"] = "disrupt"
-    possible_status = ["pistol", "rifle", "shotgun", "rocket_launcher"]
+    possible_status = [
+        "pistol",
+        "rifle",
+        "shotgun",
+        "rocket_launcher",
+        "enhancement_sickness",
+    ]
 
     # Act
     combat_result = do_combat(mock_event, mock_event)
@@ -242,24 +249,110 @@ def test_random_gun(mock_event: dict) -> None:
     # Assert
     assert combat_body["Player1"]["status_effects"][0][0] in possible_status
     assert combat_body["Player1"]["status_effects"][0][1] == 1
+    assert len(combat_body["Player1"]["status_effects"]) == 2
+
+
+def test_enhance_bad(mock_event: dict) -> None:
+    """
+    Test to check behavior of enhancing an un-enhanceable ability
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event["body"]["Player1"]["action"] = "attack"
+    mock_event["body"]["Player1"]["enhanced"] = True
+    mock_event["body"]["Player2"]["action"] = "attack"
+
+    # Act
+    combat_result = do_combat(mock_event, mock_event)
+    combat_body = json.loads(combat_result["body"])
+
+    # Assert
+    assert "Nothing happened!" in combat_body["message"][-1]
+    assert len(combat_body["Player1"]["status_effects"]) == 0
+    assert len(combat_body["Player2"]["status_effects"]) == 0
+
+
+def test_enhance_status(mock_event: dict) -> None:
+    """
+    Test to make sure enhancement fatigue is applied after successfully
+    enhancing an ability
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event["body"]["Player1"]["action"] = "disrupt"
+    mock_event["body"]["Player1"]["enhanced"] = True
+    mock_event["body"]["Player2"]["action"] = "disrupt"
+
+    # Act
+    combat_result = do_combat(mock_event, mock_event)
+    combat_body = json.loads(combat_result["body"])
+
+    # Assert
     assert len(combat_body["Player1"]["status_effects"]) == 1
+    assert len(combat_body["Player2"]["status_effects"]) == 1
+    assert combat_body["Player1"]["status_effects"] == [["enhancement_sickness", 1]]
+
+
+def test_enhancement_sickness(mock_event: dict) -> None:
+    """
+    Test to make sure enhancement sickness works when
+    you want to try to enhance 3x (it fails the 2nd time, succeeds the 3rd)
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event["body"]["Player1"]["action"] = "disrupt"
+    mock_event["body"]["Player1"]["enhanced"] = True
+    mock_event["body"]["Player2"]["action"] = "disrupt"
+
+    # Act
+    first_combat_result = do_combat(mock_event, mock_event)
+    first_combat_body = json.loads(first_combat_result["body"])
+    second_combat_result = do_combat(mock_event, mock_event)
+    second_combat_body = json.loads(second_combat_result["body"])
+    third_combat_result = do_combat(mock_event, mock_event)
+    third_combat_body = json.loads(third_combat_result["body"])
+
+    # Assert
+    assert 'Truckthunders enhanced disrupt!' in first_combat_body['message'][-1]
+    assert 'failed due to enhancement sickness' in second_combat_body['message'][0]
+    assert 'Truckthunders enhanced disrupt!' in third_combat_body['message'][-1]
+    assert 'failed due to enhancement sickness' not in third_combat_body['message'][0]
 
 
 @pytest.mark.parametrize(
     "character_class,ability_combo,expected_status",
     [
-        ("Dreamer", ["disrupt", "block"], [["prone", 1]]),
-        ("Dreamer", ["area", "disrupt"], [["disorient", 1]]),
-        ("Chosen", ["dodge", "attack"], [["haste", 1]]),
-        ("Chemist", ["attack", "disrupt"], [["poison", 2]]),
-        ("Cloistered", ["dodge", "attack"], [["counter_attack", 1]]),
-        ("Cloistered", ["block", "area"], [["counter_disrupt", 1]]),
-        ("Hacker", ["dodge", "attack"], [["anti_attack", 1], ["anti_area", 1]]),
-        ("Hacker", ["disrupt", "block"], [["lag", 1]]),
-        ("Architect", ["block", "attack"], [["absorb", 1]]),
-        ("Architect", ["area", "dodge"], [["absorb", 1]]),
-        ("Photonic", ["block", "area"], [["buff_attack", 1]]),
-        ("Photonic", ["attack", "disrupt"], [["connected", 1]]),
+        ("dreamer", ["disrupt", "block"], [["prone", 1]]),
+        ("dreamer", ["area", "disrupt"], [["disorient", 1]]),
+        ("chosen", ["dodge", "attack"], [["enhancement_sickness", 1], ["haste", 1]]),
+        ("chemist", ["attack", "disrupt"], [["poison", 2]]),
+        (
+            "cloistered",
+            ["dodge", "attack"],
+            [["enhancement_sickness", 1], ["counter_attack", 1]],
+        ),
+        (
+            "cloistered",
+            ["block", "area"],
+            [["enhancement_sickness", 1], ["counter_disrupt", 1]],
+        ),
+        ("hacker", ["dodge", "attack"], [["anti_attack", 1], ["anti_area", 1]]),
+        ("hacker", ["disrupt", "block"], [["enhancement_sickness", 1], ["lag", 1]]),
+        (
+            "architect",
+            ["block", "attack"],
+            [["enhancement_sickness", 1], ["absorb", 1]],
+        ),
+        ("architect", ["area", "dodge"], [["enhancement_sickness", 1], ["absorb", 1]]),
+        (
+            "photonic",
+            ["block", "area"],
+            [["enhancement_sickness", 1], ["buff_attack", 1]],
+        ),
+        ("photonic", ["attack", "disrupt"], [["connected", 1]]),
     ],
 )
 def test_enhancements(
@@ -347,8 +440,8 @@ def test_rules_change(
         "dodge": {"beats": ["attack", "block"], "loses": ["area", "disrupt"]},
     }
 
-    _, new_rules = getattr(combat_effects, status_effect)(
-        player=player1, rules=copy.deepcopy(default_rules), left=left
+    _, _, new_rules = getattr(combat_effects, status_effect)(
+        self=player1, target=player2, rules=copy.deepcopy(default_rules), left=left
     )
     different_rules = list()
     for key in default_rules:

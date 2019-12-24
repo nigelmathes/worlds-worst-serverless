@@ -6,7 +6,7 @@ Apply is to do something right away
 
 All apply_* functions take these inputs and give these outputs:
 
-apply_*(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+apply_*(player: Player, rules: dict, left: bool) -> EffectReturn:
     :param player: The player being affected
     :param rules: The rules dictionary to edit
     :param left: Whether the player is on the left for the sake of the rules dict
@@ -23,6 +23,7 @@ from random import randrange
 from typing import Tuple, Any
 
 Player = Any
+EffectReturn = Tuple[Player, Player, dict]
 
 
 def inflict_damage(value: int, player: Player) -> Player:
@@ -52,6 +53,17 @@ def inflict_heal(value: int, player: Player) -> Player:
     return player
 
 
+def apply_enhancement_sickness(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
+    """
+    If enhancement sick, then you can't use an enhancement this turn
+    """
+    self.enhanced = False
+
+    return self, target, rules
+
+
 # Enhanced effect of Dreamer's Moving Sidewalk - prone
 def inflict_prone(value: int, player: Player) -> Player:
     """
@@ -64,7 +76,7 @@ def inflict_prone(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Dreamer's Moving Sidewalk - prone
-def apply_prone(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_prone(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of prone to the player:
     block loses to area
@@ -89,7 +101,7 @@ def apply_prone(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
         if "block" not in rules["area"]["beats"]:
             rules["area"]["beats"].append("block")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Dreamer's Fold Earth - disorient
@@ -104,7 +116,9 @@ def inflict_disorient(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Dreamer's Fold Earth - disorient
-def apply_disorient(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_disorient(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of disorient to the target:
     dodge loses to attack
@@ -129,7 +143,7 @@ def apply_disorient(player: Player, rules: dict, left: bool) -> Tuple[Player, di
         if "dodge" not in rules["attack"]["beats"]:
             rules["attack"]["beats"].append("dodge")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Chosen's Extreme Speed - haste
@@ -144,7 +158,7 @@ def inflict_haste(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Chosen's Extreme Speed - haste
-def apply_haste(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_haste(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of haste to the target:
     attack beats attack
@@ -169,7 +183,7 @@ def apply_haste(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
         if "attack" not in rules["attack"]["loses"]:
             rules["attack"]["loses"].append("attack")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Chemist's Poison Dart
@@ -184,14 +198,14 @@ def inflict_poison(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Chemist's Poison Dart
-def apply_poison(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_poison(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of poison to the target:
     Take 10% max HP damage
     """
-    player = inflict_percent_damage(value=10, player=player)
+    self = inflict_percent_damage(value=10, player=self)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Cloistered's High Ground
@@ -207,8 +221,8 @@ def inflict_counter_attack(value: int, player: Player) -> Player:
 
 # Enhanced effect of Cloistered's High Ground
 def apply_counter_attack(
-    player: Player, rules: dict, left: bool
-) -> Tuple[Player, dict]:
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of counter_attack:
     area beats attack
@@ -233,7 +247,7 @@ def apply_counter_attack(
         if "area" not in rules["attack"]["loses"]:
             rules["attack"]["loses"].append("area")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Cloistered's Broad Deflection
@@ -249,8 +263,8 @@ def inflict_counter_disrupt(value: int, player: Player) -> Player:
 
 # Enhanced effect of Cloistered's Broad Deflection
 def apply_counter_disrupt(
-    player: Player, rules: dict, left: bool
-) -> Tuple[Player, dict]:
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of counter_disrupt:
     block beats disrupt
@@ -275,7 +289,7 @@ def apply_counter_disrupt(
         if "block" not in rules["disrupt"]["loses"]:
             rules["disrupt"]["loses"].append("block")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
@@ -296,7 +310,7 @@ def inflict_random_gun(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-def apply_pistol(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_pistol(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of pistol:
     attack is now dodge
@@ -320,22 +334,24 @@ def apply_pistol(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]
                 if "dodge" in rules[left_key][right_key]:
                     rules[left_key][right_key].append("attack")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-def apply_rifle(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_rifle(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of rifle:
-    1.5x damage
+    0.5x damage guaranteed
     """
-    player = inflict_damage(150, player)
+    target = inflict_damage(50, target)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
-def apply_shotgun(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_shotgun(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of shotgun:
     attack always clashes
@@ -356,13 +372,13 @@ def apply_shotgun(player: Player, rules: dict, left: bool) -> Tuple[Player, dict
                 if "attack" in rules[left_key][right_key]:
                     rules[left_key][right_key].remove("attack")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Creator's Conjure Weaponry / Armory Shopping
 def apply_rocket_launcher(
-    player: Player, rules: dict, left: bool
-) -> Tuple[Player, dict]:
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of rocket_launcher:
     attack is now area
@@ -386,7 +402,7 @@ def apply_rocket_launcher(
                 if "area" in rules[left_key][right_key]:
                     rules[left_key][right_key].append("attack")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Hacker's Flicker - anti_attack and anti_area
@@ -401,15 +417,17 @@ def inflict_anti_attack(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Hacker's Flicker - anti_attack
-def apply_anti_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_anti_attack(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of anti_attack:
-    Take damage if player attacks
+    Take damage if self attacks
     """
-    if player.attack == "attack":
-        player = inflict_damage(100, player)
+    if self.attack == "attack":
+        self = inflict_damage(100, self)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Hacker's Flicker - anti_area
@@ -424,15 +442,17 @@ def inflict_anti_area(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Hacker's Flicker - lag
-def apply_anti_area(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_anti_area(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of anti_attack:
-    Take damage if player area
+    Take damage if self uses area
     """
-    if player.attack == "area":
-        player = inflict_damage(100, player)
+    if self.attack == "area":
+        self = inflict_damage(100, self)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Hacker's Lag Out - lag
@@ -447,7 +467,7 @@ def inflict_lag(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Hacker's Lag Out - lag
-def apply_lag(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_lag(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of lag to the player:
     attack beats dodge
@@ -472,7 +492,7 @@ def apply_lag(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
         if "attack" not in rules["dodge"]["loses"]:
             rules["dodge"]["loses"].append("attack")
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Architect's Robot Phalanx / Swarm
@@ -486,14 +506,14 @@ def inflict_absorb(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Architect's Robot Phalanx / Swarm
-def apply_absorb(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_absorb(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of poison to the target:
     Heal a percentage of the damage you dealt last turn
     """
-    player = inflict_heal(value=50, player=player)
+    self = inflict_heal(value=50, player=self)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Photonic's Light Barrier
@@ -507,16 +527,17 @@ def inflict_buff_attack(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Photonic's Light Barrier
-# TODO: This is broken. You need the target here. Might need to add target to inputs.
-def apply_buff_attack(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_buff_attack(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of double_damage to the target:
     do double damage
     """
-    if player.attack == "attack":
-        player = inflict_damage(value=100, player=player)
+    if self.attack == "attack":
+        target = inflict_damage(value=100, player=target)
 
-    return player, rules
+    return self, target, rules
 
 
 # Enhanced effect of Photonic's Solid Light
@@ -530,7 +551,9 @@ def inflict_connected(value: int, player: Player) -> Player:
 
 
 # Enhanced effect of Photonic's Solid Light
-def apply_connected(player: Player, rules: dict, left: bool) -> Tuple[Player, dict]:
+def apply_connected(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
     """
     Apply the effects of connected:
     disrupt always clashes
@@ -551,4 +574,4 @@ def apply_connected(player: Player, rules: dict, left: bool) -> Tuple[Player, di
                 if "disrupt" in rules[left_key][right_key]:
                     rules[left_key][right_key].remove("disrupt")
 
-    return player, rules
+    return self, target, rules

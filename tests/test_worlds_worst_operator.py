@@ -210,26 +210,32 @@ def test_change_class(player: dict, dynamodb_config: boto3.resource) -> None:
     :param dynamodb_config: boto3 resource with our tables
     """
     # Arrange
-    expected_message = ["Changing class from dreamer to hacker.",
-                        "Resetting HP, EX and status for player and target."]
+    expected_message = [
+        "Changing class from dreamer to hacker.",
+        "Resetting HP, EX and status for player and target.",
+    ]
     # Act
     (
         returned_player,
         returned_target,
         player_updates,
         target_updates,
-        message
+        message,
     ) = actions.change_class(player=Player(**player), table=dynamodb_config)
 
     # Assert
     assert Player(**player) == returned_player
-    assert player_updates == {"character_class": "hacker",
-                              "hit_points": player["max_hit_points"],
-                              "ex": 0,
-                              "status_effects": []}
-    assert target_updates == {"hit_points": player["max_hit_points"],
-                              "ex": 0,
-                              "status_effects": []}
+    assert player_updates == {
+        "character_class": "hacker",
+        "hit_points": player["max_hit_points"],
+        "ex": 0,
+        "status_effects": [],
+    }
+    assert target_updates == {
+        "hit_points": player["max_hit_points"],
+        "ex": 0,
+        "status_effects": [],
+    }
     assert message == expected_message
 
 
@@ -255,7 +261,7 @@ def test_change_class_db(player: dict, dynamodb_config: boto3.resource) -> None:
         returned_target,
         player_updates,
         target_updates,
-        message
+        message,
     ) = actions.change_class(player=Player(**player), table=dynamodb_config)
 
     database_ops.update_player(

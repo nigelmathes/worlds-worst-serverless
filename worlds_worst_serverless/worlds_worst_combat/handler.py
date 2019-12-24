@@ -81,6 +81,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     }
 
     # Apply status effects
+    if ['enhancement_sickness' in sub_list for sub_list in left_player.status_effects]:
+        message.append(f"{left_player.name} tried to enhance, "
+                       f"but failed due to enhancement sickness.")
     left_player, right_player, rules = apply_status(left_player, right_player, rules)
 
     # Check if anyone died from added effects
@@ -188,28 +191,42 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             ability=right_ability, target=left_player, self=right_player
         )
 
-        print(f"After applied effects: left_player hp = {left_player.hit_points},"
-              f" right_player hp={right_player.hit_points}")
+        print(
+            f"After applied effects: left_player hp = {left_player.hit_points},"
+            f" right_player hp={right_player.hit_points}"
+        )
 
         # If enhanced, apply the enhancements, with left getting priority
         if left_player.enhanced is True:
-            message.append(
-                f"{left_player.name} enhanced {left_player.action}! "
-                f"Applying effects: "
-                f"{left_ability['enhancements']}."
-            )
-            apply_enhancements(
-                ability=left_ability, target=right_player, self=left_player
-            )
+            if left_ability["enhancements"]:
+                message.append(
+                    f"{left_player.name} enhanced {left_player.action}! "
+                    f"Applying effects: "
+                    f"{left_ability['enhancements']}."
+                )
+                apply_enhancements(
+                    ability=left_ability, target=right_player, self=left_player
+                )
+            else:
+                message.append(
+                    f"{left_player.name} tried to enhance {left_player.action}, "
+                    f"but it can't be enhanced. Nothing happened!"
+                )
         if right_player.enhanced is True:
-            message.append(
-                f"{right_player.name} enhanced {right_player.action}! "
-                f"Applying effects: "
-                f"{right_ability['enhancements']}."
-            )
-            apply_enhancements(
-                ability=right_ability, target=left_player, self=right_player
-            )
+            if right_ability["enhancements"]:
+                message.append(
+                    f"{right_player.name} enhanced {right_player.action}! "
+                    f"Applying effects: "
+                    f"{right_ability['enhancements']}."
+                )
+                apply_enhancements(
+                    ability=right_ability, target=left_player, self=right_player
+                )
+            else:
+                message.append(
+                    f"{right_player.name} tried to enhance {right_player.action}, "
+                    f"but it can't be enhanced. Nothing happened!"
+                )
 
     # Return the combat results
     combat_results = json.dumps(
