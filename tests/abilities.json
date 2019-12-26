@@ -11,7 +11,7 @@
                 "target": "target"
             }
         ],
-        "class": "Dreamer",
+        "class": "dreamer",
         "enhancements": []
     },
     {
@@ -26,7 +26,7 @@
                 "target": "target"
             }
         ],
-        "class": "Dreamer",
+        "class": "dreamer",
         "enhancements": []
     },
     {
@@ -41,7 +41,7 @@
                 "target": "target"
             }
         ],
-        "class": "Dreamer",
+        "class": "dreamer",
         "enhancements": []
     },
     {
@@ -56,7 +56,7 @@
                 "target": "target"
             }
         ],
-        "class": "Dreamer",
+        "class": "dreamer",
         "enhancements": [
             {
                 "name": "Conveyor",
@@ -78,7 +78,7 @@
                 "target": "target"
             }
         ],
-        "class": "Dreamer",
+        "class": "dreamer",
         "enhancements": [
             {
                 "name": "Distort Earth",
@@ -100,7 +100,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chosen",
+        "class": "chosen",
         "enhancements": [
             {
                 "name": "Extreme Speed",
@@ -122,7 +122,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chosen",
+        "class": "chosen",
         "enhancements": []
     },
     {
@@ -137,7 +137,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chosen",
+        "class": "chosen",
         "enhancements": [
             {
                 "name": "Focused Punch",
@@ -159,7 +159,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chosen",
+        "class": "chosen",
         "enhancements": []
     },
     {
@@ -174,7 +174,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chosen",
+        "class": "chosen",
         "enhancements": []
     },
     {
@@ -189,7 +189,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chemist",
+        "class": "chemist",
         "enhancements": []
     },
     {
@@ -204,7 +204,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chemist",
+        "class": "chemist",
         "enhancements": []
     },
     {
@@ -219,7 +219,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chemist",
+        "class": "chemist",
         "enhancements": [
             {
                 "name": "Caustic Dart",
@@ -241,7 +241,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chemist",
+        "class": "chemist",
         "enhancements": []
     },
     {
@@ -256,7 +256,7 @@
                 "target": "target"
             }
         ],
-        "class": "Chemist",
+        "class": "chemist",
         "enhancements": [
             {
                 "name": "Reactive Goo",
@@ -278,7 +278,7 @@
                 "target": "target"
             }
         ],
-        "class": "Cloistered",
+        "class": "cloistered",
         "enhancements": [
             {
                 "name": "High Ground",
@@ -300,7 +300,7 @@
                 "target": "target"
             }
         ],
-        "class": "Cloistered",
+        "class": "cloistered",
         "enhancements": [
             {
                 "name": "Broad Deflection",
@@ -322,7 +322,7 @@
                 "target": "target"
             }
         ],
-        "class": "Cloistered",
+        "class": "cloistered",
         "enhancements": []
     },
     {
@@ -337,7 +337,7 @@
                 "target": "target"
             }
         ],
-        "class": "Cloistered",
+        "class": "cloistered",
         "enhancements": []
     },
     {
@@ -352,7 +352,7 @@
                 "target": "target"
             }
         ],
-        "class": "Cloistered",
+        "class": "cloistered",
         "enhancements": []
     },
     {
@@ -367,7 +367,7 @@
                 "target": "target"
             }
         ],
-        "class": "Creator",
+        "class": "creator",
         "enhancements": []
     },
     {
@@ -382,7 +382,7 @@
                 "target": "target"
             }
         ],
-        "class": "Creator",
+        "class": "creator",
         "enhancements": []
     },
     {
@@ -397,7 +397,7 @@
                 "target": "target"
             }
         ],
-        "class": "Creator",
+        "class": "creator",
         "enhancements": [
             {
                 "name": "Modified Weaponry",
@@ -419,7 +419,7 @@
                 "target": "target"
             }
         ],
-        "class": "Creator",
+        "class": "creator",
         "enhancements": [
             {
                 "name": "Armory Shopping",
@@ -441,7 +441,7 @@
                 "target": "target"
             }
         ],
-        "class": "Creator",
+        "class": "creator",
         "enhancements": []
     },
     {
@@ -456,7 +456,7 @@
                 "target": "target"
             }
         ],
-        "class": "Hacker",
+        "class": "hacker",
         "enhancements": [
             {
                 "name": "Virus",
@@ -484,7 +484,7 @@
                 "target": "target"
             }
         ],
-        "class": "Hacker",
+        "class": "hacker",
         "enhancements": []
     },
     {
@@ -499,7 +499,7 @@
                 "target": "target"
             }
         ],
-        "class": "Hacker",
+        "class": "hacker",
         "enhancements": []
     },
     {
@@ -514,7 +514,7 @@
                 "target": "target"
             }
         ],
-        "class": "Hacker",
+        "class": "hacker",
         "enhancements": [
             {
                 "name": "Lag Out",
@@ -536,7 +536,7 @@
                 "target": "target"
             }
         ],
-        "class": "Hacker",
+        "class": "hacker",
         "enhancements": []
     },
     {
@@ -551,7 +551,7 @@
                 "target": "target"
             }
         ],
-        "class": "Architect",
+        "class": "architect",
         "enhancements": []
     },
     {
@@ -566,7 +566,7 @@
                 "target": "target"
             }
         ],
-        "class": "Architect",
+        "class": "architect",
         "enhancements": [
             {
                 "name": "Absorbing Phalanx",
@@ -588,7 +588,7 @@
                 "target": "target"
             }
         ],
-        "class": "Architect",
+        "class": "architect",
         "enhancements": []
     },
     {
@@ -603,7 +603,7 @@
                 "target": "target"
             }
         ],
-        "class": "Architect",
+        "class": "architect",
         "enhancements": []
     },
     {
@@ -618,7 +618,7 @@
                 "target": "target"
             }
         ],
-        "class": "Architect",
+        "class": "architect",
         "enhancements": [
             {
                 "name": "Absorbing Swarm",
@@ -640,7 +640,7 @@
                 "target": "target"
             }
         ],
-        "class": "Photonic",
+        "class": "photonic",
         "enhancements": []
     },
     {
@@ -655,7 +655,7 @@
                 "target": "target"
             }
         ],
-        "class": "Photonic",
+        "class": "photonic",
         "enhancements": [
             {
                 "name": "Enhancing Barrier",
@@ -677,7 +677,7 @@
                 "target": "target"
             }
         ],
-        "class": "Photonic",
+        "class": "photonic",
         "enhancements": [
             {
                 "name": "Connected Beam",
@@ -699,7 +699,7 @@
                 "target": "target"
             }
         ],
-        "class": "Photonic",
+        "class": "photonic",
         "enhancements": []
     },
     {
@@ -714,7 +714,7 @@
                 "target": "target"
             }
         ],
-        "class": "Photonic",
+        "class": "photonic",
         "enhancements": []
     }
 ]

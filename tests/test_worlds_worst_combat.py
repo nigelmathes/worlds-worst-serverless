@@ -181,8 +181,10 @@ def test_delete_multiple_status(mock_event: dict) -> None:
     mock_event["body"]["Player1"]["action"] = "disrupt"
     mock_event["body"]["Player2"]["action"] = "block"
     mock_event["body"]["Player1"]["status_effects"] = [["disorient", 1],
+                                                       ["connected", 2],
                                                        ["poison", 1],
-                                                       ["lag", 1]]
+                                                       ["lag", 1],
+                                                       ["anti_area", 999]]
     mock_event["body"]["Player1"]["enhanced"] = True
 
     # Act
@@ -191,7 +193,9 @@ def test_delete_multiple_status(mock_event: dict) -> None:
     combat_body_1 = json.loads(combat_result_1["body"])
 
     # Assert Actual == Expected
-    assert combat_body_1["Player1"]["status_effects"] == [["enhancement_sickness", 1]]
+    assert combat_body_1["Player1"]["status_effects"] == [["connected", 1],
+                                                          ["anti_area", 998],
+                                                          ["enhancement_sickness", 1]]
     assert combat_body_1["Player2"]["status_effects"] == [["prone", 1]]
 
 

@@ -61,6 +61,7 @@ def apply_status(
     """
     if player1.status_effects:
         status_effects = copy.copy(player1.status_effects)
+        offset = 0
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
             player1, player2, rules = getattr(
@@ -73,12 +74,14 @@ def apply_status(
 
             # Remove status effect if duration is 0
             if status_effect[1] == 0:
-                print(f"{i} Deleting {status_effect[0]} from first entry in"
+                print(f"\n{i} {offset} Deleting {status_effect[0]} from entry {i-offset} in"
                       f" {player1.status_effects}")
-                del player1.status_effects[0]
+                del player1.status_effects[i - offset]
+                offset += 1
 
     if player2.status_effects:
         status_effects = copy.copy(player2.status_effects)
+        offset = 0
         for i, status_effect in enumerate(status_effects):
             # Apply the status effect
             player2, player1, rules = getattr(
@@ -92,8 +95,9 @@ def apply_status(
             # Remove status effect if duration is 0
             if status_effect[1] == 0:
                 print(f"{i} Deleting {status_effect[0]} from first entry in"
-                      f" {player2.status_effects}")
-                del player2.status_effects[0]
+                      f" {player2.status_effects}, offset={offset}")
+                del player2.status_effects[i - offset]
+                offset += 1
 
     return player1, player2, rules
 

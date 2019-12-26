@@ -424,7 +424,7 @@ def apply_anti_attack(
     Apply the effects of anti_attack:
     Take damage if self attacks
     """
-    if self.attack == "attack":
+    if self.action == "attack":
         self = inflict_damage(100, self)
 
     return self, target, rules
@@ -449,7 +449,7 @@ def apply_anti_area(
     Apply the effects of anti_attack:
     Take damage if self uses area
     """
-    if self.attack == "area":
+    if self.action == "area":
         self = inflict_damage(100, self)
 
     return self, target, rules
@@ -534,7 +534,7 @@ def apply_buff_attack(
     Apply the effects of double_damage to the target:
     do double damage
     """
-    if self.attack == "attack":
+    if self.action == "attack":
         target = inflict_damage(value=100, player=target)
 
     return self, target, rules
