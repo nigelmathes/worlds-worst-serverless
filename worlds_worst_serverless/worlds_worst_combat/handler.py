@@ -84,7 +84,10 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     if ['enhancement_sickness' in sub_list for sub_list in left_player.status_effects]:
         message.append(f"{left_player.name} tried to enhance, "
                        f"but failed due to enhancement sickness.")
-    left_player, right_player, rules = apply_status(left_player, right_player, rules)
+    left_player, right_player, rules, message = apply_status(left_player,
+                                                             right_player,
+                                                             rules,
+                                                             message)
 
     # Check if anyone died from added effects
     if check_dead(left_player.hit_points, right_player.hit_points):
@@ -135,8 +138,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         if left_player.enhanced is True:
             message.append(
                 f"{left_player.name} enhanced {left_player.action}! "
-                f"Applying effects: "
-                f"{ability_to_use['enhancements']}."
+                f"Inflicting {ability_to_use['name']} on"
+                f"{ability_to_use['effects'][0]['target']} for"
+                f"{ability_to_use['effects'][0]['value']} turns."
             )
             apply_enhancements(
                 ability=ability_to_use, target=right_player, self=left_player
@@ -162,8 +166,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         if right_player.enhanced is True:
             message.append(
                 f"{right_player.name} enhanced {right_player.action}! "
-                f"Applying effects: "
-                f"{ability_to_use['enhancements']}."
+                f"Inflicting {ability_to_use['name']} on"
+                f"{ability_to_use['effects'][0]['target']} for"
+                f"{ability_to_use['effects'][0]['value']} turns."
             )
             apply_enhancements(
                 ability=ability_to_use, target=left_player, self=right_player
@@ -201,8 +206,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             if left_ability["enhancements"]:
                 message.append(
                     f"{left_player.name} enhanced {left_player.action}! "
-                    f"Applying effects: "
-                    f"{left_ability['enhancements']}."
+                    f"Inflicting {left_ability['name']} on"
+                    f"{left_ability['effects'][0]['target']} for"
+                    f"{left_ability['effects'][0]['value']} turns."
                 )
                 apply_enhancements(
                     ability=left_ability, target=right_player, self=left_player
@@ -216,8 +222,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             if right_ability["enhancements"]:
                 message.append(
                     f"{right_player.name} enhanced {right_player.action}! "
-                    f"Applying effects: "
-                    f"{right_ability['enhancements']}."
+                    f"Inflicting {right_ability['name']} on"
+                    f"{right_ability['effects'][0]['target']} for"
+                    f"{right_ability['effects'][0]['value']} turns."
                 )
                 apply_enhancements(
                     ability=right_ability, target=left_player, self=right_player

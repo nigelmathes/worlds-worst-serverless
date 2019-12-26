@@ -575,3 +575,25 @@ def apply_connected(
                     rules[left_key][right_key].remove("disrupt")
 
     return self, target, rules
+
+
+"""
+=========================== EX-Moves Here ============================
+"""
+
+
+# EX for Hacker - hello_world.exe
+def apply_hello_world(
+    self: Player, target: Player, rules: dict, left: bool
+) -> EffectReturn:
+    """
+    All clashes result in the hacker winning
+    """
+    if self.action == target.action:
+        # Change the target's action to one that loses to self's action
+        if left:
+            target.action = rules[self.action]["beats"][0]
+        else:
+            target.action = rules[self.action]["loses"][0]
+
+    return self, target, rules

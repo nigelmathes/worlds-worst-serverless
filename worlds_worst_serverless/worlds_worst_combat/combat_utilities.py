@@ -2,7 +2,7 @@
 Holds all combat logic
 """
 import copy
-from typing import Tuple, Any, Dict
+from typing import Tuple, Any, Dict, List
 
 try:
     import combat_effects
@@ -48,14 +48,15 @@ def check_dead(left_hp: int, right_hp: int) -> bool:
 
 
 def apply_status(
-    player1: Player, player2: Player, rules: dict
-) -> Tuple[Player, Player, dict]:
+    player1: Player, player2: Player, rules: dict, message: List[str]
+) -> Tuple[Player, Player, dict, List[str]]:
     """
     Method to apply status effects before combat begins
 
     :param player1: Player representing left player
     :param player2: Player representing right player
     :param rules: Dictionary of current rules
+    :param message: List of strings to return to the player
 
     :return: Updated player1 and player2
     """
@@ -67,6 +68,7 @@ def apply_status(
             player1, player2, rules = getattr(
                 combat_effects, "apply_" + status_effect[0]
             )(self=player1, target=player2, rules=rules, left=True)
+            message.append(f"Applied effects of {status_effect[0]} to {player1.name}")
 
             # Decrease the duration of this status effect, which is a list like this:
             # ['name_of_status', duration], so we index to 1 to get duration
@@ -74,8 +76,8 @@ def apply_status(
 
             # Remove status effect if duration is 0
             if status_effect[1] == 0:
-                print(f"\n{i} {offset} Deleting {status_effect[0]} from entry {i-offset} in"
-                      f" {player1.status_effects}")
+                print(f"\n{i} {offset} Deleting {status_effect[0]} from entry {i-offset}"
+                      f" in {player1.status_effects}")
                 del player1.status_effects[i - offset]
                 offset += 1
 
@@ -87,6 +89,7 @@ def apply_status(
             player2, player1, rules = getattr(
                 combat_effects, "apply_" + status_effect[0]
             )(self=player2, target=player1, rules=rules, left=False)
+            message.append(f"Applied effects of {status_effect[0]} to {player2.name}")
 
             # Decrease the duration of this status effect, which is a list like this:
             # ['name_of_status', duration], so we index to 1 to get duration
@@ -99,7 +102,7 @@ def apply_status(
                 del player2.status_effects[i - offset]
                 offset += 1
 
-    return player1, player2, rules
+    return player1, player2, rules, message
 
 
 def find_ability(abilities: list, character_class: str, attack_type: str) -> Dict:
