@@ -73,7 +73,9 @@ def apply_status(
 
             # Remove status effect if duration is 0
             if status_effect[1] == 0:
-                del player1.status_effects[i]
+                print(f"{i} Deleting {status_effect[0]} from first entry in"
+                      f" {player1.status_effects}")
+                del player1.status_effects[0]
 
     if player2.status_effects:
         status_effects = copy.copy(player2.status_effects)
@@ -89,7 +91,9 @@ def apply_status(
 
             # Remove status effect if duration is 0
             if status_effect[1] == 0:
-                del player2.status_effects[i]
+                print(f"{i} Deleting {status_effect[0]} from first entry in"
+                      f" {player2.status_effects}")
+                del player2.status_effects[0]
 
     return player1, player2, rules
 

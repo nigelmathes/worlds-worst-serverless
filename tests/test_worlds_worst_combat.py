@@ -170,6 +170,31 @@ def test_check_dead(mock_event: dict) -> None:
     assert combat_message == expected_message
 
 
+def test_delete_multiple_status(mock_event: dict) -> None:
+    """
+    Test that status effects get correctly removed when there are multiple
+    status effects with a duration of 1 in the status effects list
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+    # Arrange
+    mock_event["body"]["Player1"]["action"] = "disrupt"
+    mock_event["body"]["Player2"]["action"] = "block"
+    mock_event["body"]["Player1"]["status_effects"] = [["disorient", 1],
+                                                       ["poison", 1],
+                                                       ["lag", 1]]
+    mock_event["body"]["Player1"]["enhanced"] = True
+
+    # Act
+    # Perform a round of combat
+    combat_result_1 = do_combat(mock_event, mock_event)
+    combat_body_1 = json.loads(combat_result_1["body"])
+
+    # Assert Actual == Expected
+    assert combat_body_1["Player1"]["status_effects"] == [["enhancement_sickness", 1]]
+    assert combat_body_1["Player2"]["status_effects"] == [["prone", 1]]
+
+
 def test_multiple_status(mock_event: dict) -> None:
     """
     Test that status effects get correctly applied/updated when there are multiple

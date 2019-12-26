@@ -3,8 +3,8 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <strong>You are TruckThunders, a Photonic. You can enhance attacks
-                        of the type disrupt and area.<br></strong>
+                    <strong>You are {{result.name}}, a {{result.character_class}}.
+                        You can enhance attacks of the type disrupt and area.<br></strong>
                     <weak>Enhanced Disrupt = Conveyor: Target is Prone. Next turn, block
                         loses to area<br></weak>
                     <weak>Enhanced Area = Distort Earth: Target is Disoriented. Next
