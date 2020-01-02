@@ -17,6 +17,7 @@ try:
         find_ability,
         apply_ability_effects,
         apply_enhancements,
+        apply_ex,
     )
 except ImportError:
     from .combat_utilities import (
@@ -26,6 +27,7 @@ except ImportError:
         find_ability,
         apply_ability_effects,
         apply_enhancements,
+        apply_ex,
     )
 
 LambdaDict = Dict[str, Any]
@@ -138,9 +140,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         if left_player.enhanced is True:
             message.append(
                 f"{left_player.name} enhanced {left_player.action}! "
-                f"Inflicting {ability_to_use['name']} on"
-                f"{ability_to_use['effects'][0]['target']} for"
-                f"{ability_to_use['effects'][0]['value']} turns."
+                f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
+                f" {ability_to_use['enhancements'][0]['target']} for"
+                f" {ability_to_use['enhancements'][0]['value']} turn(s)."
             )
             apply_enhancements(
                 ability=ability_to_use, target=right_player, self=left_player
@@ -166,9 +168,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         if right_player.enhanced is True:
             message.append(
                 f"{right_player.name} enhanced {right_player.action}! "
-                f"Inflicting {ability_to_use['name']} on"
-                f"{ability_to_use['effects'][0]['target']} for"
-                f"{ability_to_use['effects'][0]['value']} turns."
+                f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
+                f" {ability_to_use['enhancements'][0]['target']} for"
+                f" {ability_to_use['enhancements'][0]['value']} turn(s)."
             )
             apply_enhancements(
                 ability=ability_to_use, target=left_player, self=right_player
@@ -206,9 +208,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             if left_ability["enhancements"]:
                 message.append(
                     f"{left_player.name} enhanced {left_player.action}! "
-                    f"Inflicting {left_ability['name']} on"
-                    f"{left_ability['effects'][0]['target']} for"
-                    f"{left_ability['effects'][0]['value']} turns."
+                    f"Inflicting {left_ability['enhancements'][0]['name']} on"
+                    f" {left_ability['enhancements'][0]['target']} for"
+                    f" {left_ability['enhancements'][0]['value']} turn(s)."
                 )
                 apply_enhancements(
                     ability=left_ability, target=right_player, self=left_player
@@ -222,9 +224,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
             if right_ability["enhancements"]:
                 message.append(
                     f"{right_player.name} enhanced {right_player.action}! "
-                    f"Inflicting {right_ability['name']} on"
-                    f"{right_ability['effects'][0]['target']} for"
-                    f"{right_ability['effects'][0]['value']} turns."
+                    f"Inflicting {right_ability['enhancements'][0]['name']} on"
+                    f" {right_ability['enhancements'][0]['target']} for"
+                    f" {right_ability['enhancements'][0]['value']} turn(s)."
                 )
                 apply_enhancements(
                     ability=right_ability, target=left_player, self=right_player
@@ -234,6 +236,12 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
                     f"{right_player.name} tried to enhance {right_player.action}, "
                     f"but it can't be enhanced. Nothing happened!"
                 )
+
+    if left_player.ex == left_player.max_ex:
+        apply_ex(left_player)
+
+    if right_player.ex == right_player.max_ex:
+        apply_ex(right_player)
 
     # Return the combat results
     combat_results = json.dumps(

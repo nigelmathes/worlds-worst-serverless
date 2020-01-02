@@ -162,3 +162,12 @@ def apply_enhancements(ability: dict, target: Player, self: Player) -> None:
             getattr(combat_effects, "inflict_" + enhancement["effect"])(
                 value=enhancement["value"], player=self
             )
+
+
+def apply_ex(player: Player) -> None:
+    """
+    Apply the effect of a character's EX ability
+
+    :param player: Player to apply the EX ability to
+    """
+    getattr(combat_effects, "inflict_ex_" + player.character_class)

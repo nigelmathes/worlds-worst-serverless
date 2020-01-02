@@ -351,6 +351,15 @@ def test_enhancement_sickness(mock_event: dict) -> None:
     assert 'failed due to enhancement sickness' not in third_combat_body['message'][0]
 
 
+def test_apply_hello_world(mock_event: dict) -> None:
+    """
+    Test hello_world.exe works as expected:
+    Clashes result in the hacker winning
+
+    :param mock_event: Mock AWS lambda event dict
+    """
+
+
 @pytest.mark.parametrize(
     "character_class,ability_combo,expected_status",
     [
