@@ -1,4 +1,4 @@
-service: find-interesting-things
+service: find_interesting_things
 
 provider:
   name: aws

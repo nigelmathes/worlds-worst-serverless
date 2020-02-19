@@ -1,4 +1,4 @@
-service: machine-learning-package
+service: worlds_worst_story_writer
 
 provider:
   name: aws
