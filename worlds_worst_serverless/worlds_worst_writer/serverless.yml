@@ -1,4 +1,4 @@
-service: worlds_worst_story_writer
+service: worlds_worst_writer
 
 provider:
   name: aws
