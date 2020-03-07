@@ -2,3 +2,9 @@ worlds_worst_frontend:
   component: serverless-next.js
   inputs:
     domain: "worldsworst.games"
+  iamRoleStatements: # permissions for all of your functions can be set here
+    - Effect: Allow
+      Action: # Gives permission to Lambda Invoke
+        - lambda:InvokeFunction
+      Resource:
+        - 'arn:aws:lambda:us-east-1:*:*'

@@ -177,16 +177,38 @@ def change_class_message(player: Player, table: dynamodb.Table) -> ActionRespons
     :param player: The original player, before actions were taken
     :param table: DynamoDB table object (unused)
 
-    :return: Updated Player dataclass and dict of fields to update, and a message
+    :return: Unchanged Player dataclass with no updates, and a message
     """
     message = [
-        "What class would you like to change to?\n"
-        "You may choose from: \n"
+        "What class would you like to change to?",
+        "You may choose from:",
         "Dreamer, Cloistered, Chosen, Chemist, Creator,"
-        " Hacker, Architect, or Photonic\n"
+        " Hacker, Architect, or Photonic",
         "Enter that choice now."
     ]
 
+    return player, player, dict(), dict(), message
+
+
+def get_player_info(player: Player, table: dynamodb.Table) -> ActionResponse:
+    """
+    Function to return all information about a Player
+
+    :param player: The original player, before actions were taken
+    :param table: DynamoDB table object
+
+    :return: Unchanged Player dataclass with no updates and no message
+    """
+    if player.character_class[0] in ('a', 'e', 'i', 'o', 'u'):
+        article = 'an'
+    else:
+        article = 'a'
+
+    message = [
+        f"You are {player.name}, {article} {player.character_class}",
+        f"You have {player.hit_points} HP and {player.ex} EX",
+        f"Your status effects are {player.status_effects}"
+    ]
     return player, player, dict(), dict(), message
 
 
@@ -246,4 +268,8 @@ ACTIONS_MAP = {
     "hacker": change_class,
     "architect": change_class,
     "photonic": change_class,
+    "get player info": get_player_info,
+    "status": get_player_info,
+    "my status": get_player_info,
+    "my information": get_player_info,
 }
