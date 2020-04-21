@@ -46,10 +46,16 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     id_token = request_body["playerId"]
     target_token = "target_hash"
     action = request_body["action"].lower()
-    if isinstance(request_body["enhanced"], str):
-        enhanced = json.loads(request_body["enhanced"])
-    else:
-        enhanced = request_body["enhanced"]
+
+    enhanced_words_with_typos = [
+        "enhance",
+        "enhanced",
+        "enhancement"
+        "enhanec"
+        "nehance"
+        
+    ]
+    if any(word in action for word in enhanced_words_with_typos):
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
