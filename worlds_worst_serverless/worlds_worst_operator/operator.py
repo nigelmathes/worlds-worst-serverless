@@ -53,9 +53,12 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         "enhancement"
         "enhanec"
         "nehance"
-        
+        "enhancd"
     ]
     if any(word in action for word in enhanced_words_with_typos):
+        enhanced = True
+    else:
+        enhanced = False
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
