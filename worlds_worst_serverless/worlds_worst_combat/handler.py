@@ -48,6 +48,7 @@ class Player:
     status_effects: list
     action: str
     enhanced: bool
+    auth_token: str
 
 
 def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:

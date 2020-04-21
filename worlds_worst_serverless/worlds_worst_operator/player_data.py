@@ -16,3 +16,4 @@ class Player:
     status_effects: list
     action: str
     enhanced: bool
+    auth_token: str

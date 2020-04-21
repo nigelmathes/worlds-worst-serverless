@@ -30,8 +30,8 @@ LambdaDict = Dict[str, Any]
 
 def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     """
-    Function to take input in the form of a Player object, along with login
-    credentials and a command
+    Function to take auth credentials from the frontend and update the
+    JWT associated with a player's character in dynamodb
 
     :param event: Input AWS Lambda event dict
     :param context: Input AWS Lambda context dict
