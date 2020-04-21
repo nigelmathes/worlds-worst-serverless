@@ -1,0 +1,11 @@
+{
+  "name": "worlds-worst-auth",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless": "^1.67.3"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^5.1.0"
+  }
+}

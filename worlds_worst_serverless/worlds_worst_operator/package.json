@@ -1,0 +1,11 @@
+{
+  "name": "worlds-worst-operator",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless": "^1.60.5"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^5.0.1"
+  }
+}
