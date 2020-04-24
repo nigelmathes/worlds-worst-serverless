@@ -55,6 +55,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         "nehance"
         "enhancd"
     ]
+    # Handle if the user is enhancing their command
     if any(word in action for word in enhanced_words_with_typos):
         enhanced = True
     else:

@@ -121,27 +121,27 @@ def apply_disorient(
 ) -> EffectReturn:
     """
     Apply the effects of disorient to the target:
-    dodge loses to attack
+    dodge loses to block
     """
-    # "dodge": {"beats": ["block"], "loses": ["area", "disrupt", "attack"]}
+    # "dodge": {"beats": ["attack"], "loses": ["area", "disrupt", "block"]}
     if left:
         # Remove area from the block: beats dict
-        if "attack" in rules["dodge"]["beats"]:
-            rules["dodge"]["beats"].remove("attack")
+        if "block" in rules["dodge"]["beats"]:
+            rules["dodge"]["beats"].remove("block")
 
         # Add area to the block: loses dict
-        if "attack" not in rules["dodge"]["loses"]:
-            rules["dodge"]["loses"].append("attack")
+        if "block" not in rules["dodge"]["loses"]:
+            rules["dodge"]["loses"].append("block")
 
-    # "attack": {"beats": ["area", "disrupt", "dodge"], "loses": ["block"]}
+    # "block": {"beats": ["area", "attack", "dodge"], "loses": ["disrupt"]}
     else:
         # Remove block from the area: loses dict
-        if "dodge" in rules["attack"]["loses"]:
-            rules["attack"]["loses"].remove("dodge")
+        if "dodge" in rules["block"]["loses"]:
+            rules["block"]["loses"].remove("dodge")
 
         # Add block to the area: beats dict
-        if "dodge" not in rules["attack"]["beats"]:
-            rules["attack"]["beats"].append("dodge")
+        if "dodge" not in rules["block"]["beats"]:
+            rules["block"]["beats"].append("dodge")
 
     return self, target, rules
 
@@ -441,7 +441,7 @@ def inflict_anti_area(value: int, player: Player) -> Player:
     return player
 
 
-# Enhanced effect of Hacker's Flicker - lag
+# Enhanced effect of Hacker's Flicker - anti_area
 def apply_anti_area(
     self: Player, target: Player, rules: dict, left: bool
 ) -> EffectReturn:
@@ -470,10 +470,20 @@ def inflict_lag(value: int, player: Player) -> Player:
 def apply_lag(self: Player, target: Player, rules: dict, left: bool) -> EffectReturn:
     """
     Apply the effects of lag to the player:
-    attack beats dodge
+    dodge loses to attack
     """
-    # "attack": {"beats": ["disrupt", "area", "dodge"], "loses": ["block"]},
+    # "dodge": {"beats": ["block"], "loses": ["area", "disrupt", "attack"]},
     if left:
+        # Remove attack from the dodge: beats dict
+        if "attack" in rules["dodge"]["beats"]:
+            rules["dodge"]["beats"].remove("attack")
+
+        # Add attack to the dodge: loses dict
+        if "attack" not in rules["dodge"]["loses"]:
+            rules["dodge"]["loses"].append("attack")
+
+    # "attack": {"beats": ["disrupt", "area", "dodge"], "loses": ["block"]}
+    else:
         # Remove dodge from the attack: loses dict
         if "dodge" in rules["attack"]["loses"]:
             rules["attack"]["loses"].remove("dodge")
@@ -481,16 +491,6 @@ def apply_lag(self: Player, target: Player, rules: dict, left: bool) -> EffectRe
         # Add dodge to the attack: beats dict
         if "dodge" not in rules["attack"]["beats"]:
             rules["attack"]["beats"].append("dodge")
-
-    # "dodge": {"beats": ["block"], "loses": ["area", "disrupt", "attack"]}}
-    else:
-        # Remove attack from the dodge: beats dict
-        if "attack" in rules["dodge"]["beats"]:
-            rules["dodge"]["beats"].remove("attack")
-
-        # Add block to the area: beats dict
-        if "attack" not in rules["dodge"]["loses"]:
-            rules["dodge"]["loses"].append("attack")
 
     return self, target, rules
 

@@ -19,6 +19,7 @@ def player1():
         "status_effects": [],
         "action": "attack",
         "enhanced": False,
+        "auth_token": "i_am_authed"
     }
 
 
@@ -34,6 +35,7 @@ def player2():
         "status_effects": [],
         "action": "area",
         "enhanced": False,
+        "auth_token": "i_am_also_authed"
     }
 
 
@@ -378,7 +380,7 @@ def test_apply_hello_world(mock_event: dict) -> None:
             [["enhancement_sickness", 1], ["counter_disrupt", 1]],
         ),
         ("hacker", ["dodge", "attack"], [["anti_attack", 1], ["anti_area", 1]]),
-        ("hacker", ["disrupt", "block"], [["enhancement_sickness", 1], ["lag", 1]]),
+        ("hacker", ["disrupt", "block"], [["lag", 1]]),
         (
             "architect",
             ["block", "attack"],
@@ -426,6 +428,10 @@ def test_enhancements(
     combat_result = do_combat(mock_event, mock_event)
     combat_body = json.loads(combat_result["body"])
 
+    if character_class == "dreamer":
+        print(combat_body["Player1"]["status_effects"])
+        print(combat_body["Player2"]["status_effects"])
+
     # Assert
     assert combat_body["Player1"]["hit_points"] == expected_player1_hp
     assert combat_body["Player2"]["hit_points"] == expected_player2_hp
@@ -440,7 +446,7 @@ def test_enhancements(
     [
         ("apply_prone", ["area"], False),
         ("apply_prone", ["block"], True),
-        ("apply_disorient", ["attack"], False),
+        ("apply_disorient", ["block"], False),
         ("apply_disorient", ["dodge"], True),
         ("apply_haste", ["attack"], False),
         ("apply_haste", ["attack"], True),
@@ -456,8 +462,8 @@ def test_enhancements(
         ("apply_rocket_launcher", ["attack"], True),
         ("apply_connected", ["attack", "area", "block", "dodge"], False),
         ("apply_connected", ["disrupt"], True),
-        ("apply_lag", ["dodge"], False),
-        ("apply_lag", ["attack"], True),
+        ("apply_lag", ["attack"], False),
+        ("apply_lag", ["dodge"], True),
     ],
 )
 def test_rules_change(

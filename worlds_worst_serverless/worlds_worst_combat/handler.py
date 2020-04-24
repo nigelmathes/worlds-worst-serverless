@@ -138,6 +138,13 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         )
 
         # If enhanced, apply the enhancements
+        # TODO: Enhancement not being handled properly - bug here if you try to
+        #  enhance an ability that doesn't have an enhancement. It should fizzle,
+        #  but still apply enhancement sickness
+
+        # TODO: There's also a bug where if you use a non-enhanced ability when you
+        #  have enhancement sickness, the message dispalyed will say you tried to
+        #  enhance something. Fix that too.
         if left_player.enhanced is True:
             message.append(
                 f"{left_player.name} enhanced {left_player.action}! "
