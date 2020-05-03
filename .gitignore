@@ -12,3 +12,4 @@ world_worst_serverless/*/.serverless/*
 worlds_worst_serverless/*/node_modules/*
 worlds_worst_serverless/*/.requirements.zip
 worlds_worst_serverless/worlds_worst_combat/translate.py
+worlds_worst_serverless/worlds_worst_operator/arns.py

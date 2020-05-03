@@ -47,6 +47,7 @@ def create_new_player(table: dynamodb.Table, player_token: str, auth_token: str)
         "action": "attack",
         "enhanced": False,
         "auth_token": auth_token,
+        "context": "home",
     }
 
     # Put player into DB

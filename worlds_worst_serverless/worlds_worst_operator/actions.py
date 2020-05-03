@@ -10,9 +10,11 @@ from fuzzywuzzy import process
 try:
     from database_ops import get_player
     from player_data import Player
+    from arns import COMBAT_ARN
 except ImportError:
     from .database_ops import get_player
     from .player_data import Player
+    from .arns import COMBAT_ARN
 
 lambda_client = boto3.client("lambda", region_name="us-east-1")
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
@@ -59,16 +61,12 @@ def do_combat(player: Player, table: dynamodb.Table) -> ActionResponse:
     target.action = random.choice(possible_attacks)
     # target.enhanced = random.choice([True, False])
 
-    arn = (
-        "arn:aws:lambda:us-east-1:437610822210:function:"
-        "worlds-worst-combat-dev-do_combat"
-    )
     data = {"body": {"Player1": asdict(player), "Player2": asdict(target)}}
     payload = json.dumps(data)
 
     # Invoke the combat lambda
     response = lambda_client.invoke(
-        FunctionName=arn, InvocationType="RequestResponse", Payload=payload
+        FunctionName=COMBAT_ARN, InvocationType="RequestResponse", Payload=payload
     )
     # response of the form:
     # {

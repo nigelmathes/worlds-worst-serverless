@@ -17,3 +17,4 @@ class Player:
     action: str
     enhanced: bool
     auth_token: str
+    context: str

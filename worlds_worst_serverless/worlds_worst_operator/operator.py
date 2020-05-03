@@ -50,10 +50,10 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     enhanced_words_with_typos = [
         "enhance",
         "enhanced",
-        "enhancement"
-        "enhanec"
-        "nehance"
-        "enhancd"
+        "enhancement",
+        "enhanec",
+        "nehance",
+        "enhancd",
     ]
     # Handle if the user is enhancing their command
     if any(word in action for word in enhanced_words_with_typos):
@@ -63,12 +63,6 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
 
     # Set up the database access
     player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
-
-    # If action is reset, do the table reset and return here
-    if action == "/reset":
-        result = reset_characters(table=player_table)
-        # Contains return dict with a 200 statusCode
-        return result
 
     # Verify the ID of the player and load player data if successful
     player_data, verified = verify_player(table=player_table, player_token=id_token)

@@ -134,7 +134,7 @@ def verify_player(table: dynamodb.Table, player_token: str) -> Tuple[Dict, bool]
             {
                 "statusCode": 401,
                 "body": json.dumps({"Error": "Player does not exist in database"}),
-                "message": json.dumps("Time to reroll."),
+                "message": json.dumps("Please log in again."),
                 "headers": {"Access-Control-Allow-Origin": "*"},
             },
             False,

@@ -31,7 +31,6 @@ def authenticate(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     :return: Output AWS Lambda dict
     """
     # Decode the request
-    print(event)
     request_body = event.get("body")
     if type(request_body) == str:
         request_body = json.loads(request_body)
