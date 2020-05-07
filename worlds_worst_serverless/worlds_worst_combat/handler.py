@@ -49,6 +49,8 @@ class Player:
     action: str
     enhanced: bool
     auth_token: str
+    context: str
+    history: list
 
 
 def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
@@ -84,9 +86,6 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     }
 
     # Apply status effects
-    if ['enhancement_sickness' in sub_list for sub_list in left_player.status_effects]:
-        message.append(f"{left_player.name} tried to enhance, "
-                       f"but failed due to enhancement sickness.")
     left_player, right_player, rules, message = apply_status(left_player,
                                                              right_player,
                                                              rules,
@@ -138,23 +137,20 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
         )
 
         # If enhanced, apply the enhancements
-        # TODO: Enhancement not being handled properly - bug here if you try to
-        #  enhance an ability that doesn't have an enhancement. It should fizzle,
-        #  but still apply enhancement sickness
-
-        # TODO: There's also a bug where if you use a non-enhanced ability when you
-        #  have enhancement sickness, the message dispalyed will say you tried to
-        #  enhance something. Fix that too.
         if left_player.enhanced is True:
-            message.append(
-                f"{left_player.name} enhanced {left_player.action}! "
-                f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
-                f" {ability_to_use['enhancements'][0]['target']} for"
-                f" {ability_to_use['enhancements'][0]['value']} turn(s)."
-            )
-            apply_enhancements(
-                ability=ability_to_use, target=right_player, self=left_player
-            )
+            if ability_to_use['enhancements']:
+                message.append(
+                    f"{left_player.name} enhanced {left_player.action}! "
+                    f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
+                    f" {ability_to_use['enhancements'][0]['target']} for"
+                    f" {ability_to_use['enhancements'][0]['value']} turn(s)."
+                )
+                apply_enhancements(
+                    ability=ability_to_use, target=right_player, self=left_player
+                )
+            else:
+                message.append(f"{left_player.character_class}s cannot enhance "
+                               f"{left_player.action}!")
 
     elif outcome == "right_wins":
         message.append(f"{right_player.name} wins.")
@@ -174,15 +170,19 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
         # If enhanced, apply the enhancements
         if right_player.enhanced is True:
-            message.append(
-                f"{right_player.name} enhanced {right_player.action}! "
-                f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
-                f" {ability_to_use['enhancements'][0]['target']} for"
-                f" {ability_to_use['enhancements'][0]['value']} turn(s)."
-            )
-            apply_enhancements(
-                ability=ability_to_use, target=left_player, self=right_player
-            )
+            if ability_to_use['enhancements']:
+                message.append(
+                    f"{right_player.name} enhanced {right_player.action}! "
+                    f"Inflicting {ability_to_use['enhancements'][0]['name']} on"
+                    f" {ability_to_use['enhancements'][0]['target']} for"
+                    f" {ability_to_use['enhancements'][0]['value']} turn(s)."
+                )
+                apply_enhancements(
+                    ability=ability_to_use, target=left_player, self=right_player
+                )
+            else:
+                message.append(f"{right_player.character_class}s cannot enhance "
+                               f"{right_player.action}!")
     else:
         message.append(f"{left_player.name} and {right_player.name} tie.")
         # Update EX meters
@@ -250,6 +250,9 @@ def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
 
     if right_player.ex == right_player.max_ex:
         apply_ex(right_player)
+
+    left_player.enhanced = False
+    right_player.enhanced = False
 
     # Return the combat results
     combat_results = json.dumps(

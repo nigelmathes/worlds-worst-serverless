@@ -18,3 +18,4 @@ class Player:
     enhanced: bool
     auth_token: str
     context: str
+    history: list
