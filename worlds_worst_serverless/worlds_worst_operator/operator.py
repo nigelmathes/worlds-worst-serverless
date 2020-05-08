@@ -16,11 +16,15 @@ from fuzzywuzzy import process
 try:
     from database_ops import create_player, update_player, verify_player
     from player_data import Player
-    from actions import ACTIONS_MAP, unknown_action, do_combat
+    from common_actions import COMMON_ACTIONS_MAP, unknown_action
+    from combat_actions import COMBAT_ACTIONS_MAP
+    from home_actions import HOME_ACTIONS_MAP
 except ImportError:
     from .database_ops import create_player, update_player, verify_player
     from .player_data import Player
-    from .actions import ACTIONS_MAP, unknown_action, do_combat
+    from .common_actions import COMMON_ACTIONS_MAP, unknown_action
+    from .combat_actions import COMBAT_ACTIONS_MAP
+    from .home_actions import HOME_ACTIONS_MAP
 
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 lambda_client = boto3.client("lambda", region_name="us-east-1")
@@ -47,6 +51,18 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     target_token = "target_hash"
     action = request_body["action"].lower()
 
+    # Set up the database access
+    player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
+
+    # Verify the ID of the player and load player data if successful
+    player_data, verified = verify_player(table=player_table, player_token=id_token)
+
+    if verified:
+        player = Player(**player_data)
+    else:
+        # Contains the return dict with a 401 statusCode
+        return player_data
+
     enhanced_words_with_typos = [
         "enhance",
         "enhanced",
@@ -61,20 +77,11 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     else:
         enhanced = False
 
-    # Set up the database access
-    player_table = dynamodb.Table(os.environ["DYNAMODB_TABLE"])
-
-    # Verify the ID of the player and load player data if successful
-    player_data, verified = verify_player(table=player_table, player_token=id_token)
-
-    if verified:
-        player = Player(**player_data)
-    else:
-        # Contains the return dict with a 401 statusCode
-        return player_data
+    # Build the actions map
+    actions_map = build_actions_map(context=player.context)
 
     # If you get here, auth is good. Take action based on player info and action
-    action_to_do, function_to_run = route_action(action=action)
+    action_to_do, function_to_run = route_action(action=action, actions_map=actions_map)
 
     # Give the player the input action and its enhanced flag
     player.action = action_to_do
@@ -106,23 +113,45 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     return result
 
 
-def route_action(action: str) -> Tuple[str, Callable]:
+def build_actions_map(context: str) -> Dict:
+    """
+    Function to use the context passed to determine which actions dicts should be
+    combined to use for routing
+
+    :param context: String containing the context of the player
+
+    :return: Full actions dictionary to traverse to determine function to run
+    """
+    combined_actions_map = COMMON_ACTIONS_MAP
+
+    if context == 'home':
+        combined_actions_map.update(HOME_ACTIONS_MAP)
+    if context == 'home':
+        combined_actions_map.update(COMBAT_ACTIONS_MAP)
+    #if context == 'text_adventure':
+    #    combined_actions_map.update(TEXT_ADVENTURE_ACTIONS_MAP)
+
+    return combined_actions_map
+
+
+def route_action(action: str, actions_map: dict) -> Tuple[str, Callable]:
     """
     Function to take in an action and route the command to the appropriate functions
 
     :param action: String action to take
+    :param actions_map: Dictionary of possible actions
 
     :return: List of functions to call, in order, to complete the action
     """
-    if action in ACTIONS_MAP:
+    if action in actions_map:
         # Perfect match
-        return action, ACTIONS_MAP[action]
+        return action, actions_map[action]
     else:
         # Fuzzy match
-        possible_actions = ACTIONS_MAP.keys()
+        possible_actions = actions_map.keys()
         matched_action = process.extractOne(action, possible_actions)[0]
 
-        return matched_action, ACTIONS_MAP[matched_action]
+        return matched_action, actions_map[matched_action]
 
 
 def reset_characters(table: dynamodb.Table) -> Dict:

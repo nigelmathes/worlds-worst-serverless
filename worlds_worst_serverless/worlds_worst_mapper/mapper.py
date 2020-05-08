@@ -20,7 +20,7 @@ LambdaDict = Dict[str, Any]
 def get_matching_action(event: LambdaDict, context: LambdaDict) -> LambdaDict:
     """
     Function to receive an action and find the closest matching action in
-    the ACTIONS_MAP dictionary.
+    the COMMON_ACTIONS_MAP dictionary.
 
     :param event: Input AWS Lambda event dict
     :param context: Input AWS Lambda context dict
