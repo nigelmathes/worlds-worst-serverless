@@ -12,10 +12,10 @@ try:
     from arns import COMBAT_ARN
     from common_actions import create_update_fields
 except ImportError:
-    from .database_ops import get_player
-    from .player_data import Player
-    from .arns import COMBAT_ARN
-    from .common_actions import create_update_fields
+    from ..database_ops import get_player
+    from ..player_data import Player
+    from ..arns import COMBAT_ARN
+    from ..action_sets.common_actions import create_update_fields
 
 
 lambda_client = boto3.client("lambda", region_name="us-east-1")

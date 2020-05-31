@@ -9,11 +9,9 @@ from fuzzywuzzy import process
 try:
     from database_ops import get_player
     from player_data import Player
-    from arns import COMBAT_ARN
 except ImportError:
-    from .database_ops import get_player
-    from .player_data import Player
-    from .arns import COMBAT_ARN
+    from ..database_ops import get_player
+    from ..player_data import Player
 
 lambda_client = boto3.client("lambda", region_name="us-east-1")
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
@@ -28,7 +26,7 @@ def unknown_action(player: Player, target: Player) -> ActionResponse:
     :return: Original inputs matching updated inputs, and a message
     """
     message = ["Action could not be resolved, type better next time"]
-    return player, target, dict(), dict(), message
+    return player, target, {}, {}, message
 
 
 def change_class(player: Player, table: dynamodb.Table) -> ActionResponse:
@@ -54,7 +52,7 @@ def change_class(player: Player, table: dynamodb.Table) -> ActionResponse:
         # Return a 401 error if the id does not match an id in the database
         # User is not authorized
         message = ["ERROR. This is embarrassing. Could not find opponent in database."]
-        return player, player, dict(), dict(), message
+        return player, player, {}, {}, message
 
     possible_classes = [
         "dreamer",
@@ -74,8 +72,8 @@ def change_class(player: Player, table: dynamodb.Table) -> ActionResponse:
         # Fuzzy match
         matched_class = process.extractOne(player.action, possible_classes)[0]
 
-    player_updates = dict()
-    target_updates = dict()
+    player_updates = {}
+    target_updates = {}
 
     # Reset player and target HP to restart combat
     player_updates["character_class"] = matched_class
@@ -111,7 +109,7 @@ def change_class_message(player: Player, table: dynamodb.Table) -> ActionRespons
         "Enter that choice now."
     ]
 
-    return player, player, dict(), dict(), message
+    return player, player, {}, {}, message
 
 
 def get_player_info(player: Player, table: dynamodb.Table) -> ActionResponse:
@@ -131,9 +129,10 @@ def get_player_info(player: Player, table: dynamodb.Table) -> ActionResponse:
     message = [
         f"You are {player.name}, {article} {player.character_class}",
         f"You have {player.hit_points} HP and {player.ex} EX",
-        f"Your status effects are {player.status_effects}"
+        f"Your status effects are {player.status_effects}",
+        f"You are currently {player.context}. What would you like to do?"
     ]
-    return player, player, dict(), dict(), message
+    return player, player, {}, {}, message
 
 
 def create_update_fields(player: Player, updated_player: Player) -> Dict:
@@ -146,7 +145,7 @@ def create_update_fields(player: Player, updated_player: Player) -> Dict:
 
     :return: Dictionary mapping Player fields to values which will be updated
     """
-    fields_to_update = dict()
+    fields_to_update = {}
     if player != updated_player:
         print(f"{player.name} needs updating!")
         # Loop over player fields and output what needs updating as dict
@@ -171,14 +170,6 @@ COMMON_ACTIONS_MAP = {
     "change": change_class_message,
     "change class": change_class_message,
     "change character": change_class_message,
-    "change class dreamer": change_class,
-    "change class cloistered": change_class,
-    "change class chosen": change_class,
-    "change class chemist": change_class,
-    "change class creator": change_class,
-    "change class hacker": change_class,
-    "change class architect": change_class,
-    "change class photonic": change_class,
     "dreamer": change_class,
     "cloistered": change_class,
     "chosen": change_class,

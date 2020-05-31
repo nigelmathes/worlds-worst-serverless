@@ -16,15 +16,16 @@ from fuzzywuzzy import process
 try:
     from database_ops import create_player, update_player, verify_player
     from player_data import Player
-    from common_actions import COMMON_ACTIONS_MAP, unknown_action
-    from combat_actions import COMBAT_ACTIONS_MAP
-    from home_actions import HOME_ACTIONS_MAP
+    from action_sets.common_actions import COMMON_ACTIONS_MAP, unknown_action
+    from action_sets.combat_actions import COMBAT_ACTIONS_MAP
+    from action_sets.home_actions import HOME_ACTIONS_MAP
 except ImportError:
     from .database_ops import create_player, update_player, verify_player
     from .player_data import Player
-    from .common_actions import COMMON_ACTIONS_MAP, unknown_action
-    from .combat_actions import COMBAT_ACTIONS_MAP
-    from .home_actions import HOME_ACTIONS_MAP
+    from .action_sets.common_actions import COMMON_ACTIONS_MAP, unknown_action
+    from .action_sets.combat_actions import COMBAT_ACTIONS_MAP
+    from .action_sets.home_actions import HOME_ACTIONS_MAP
+    from .action_sets.text_adventure_actions import TEXT_ADVENTURE_ACTIONS_MAP
 
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 lambda_client = boto3.client("lambda", region_name="us-east-1")
@@ -63,6 +64,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
         # Contains the return dict with a 401 statusCode
         return player_data
 
+    # If you get here, auth is good.
     enhanced_words_with_typos = [
         "enhance",
         "enhanced",
@@ -80,7 +82,7 @@ def route_tasks_and_response(event: LambdaDict, context: LambdaDict) -> LambdaDi
     # Build the actions map
     actions_map = build_actions_map(context=player.context)
 
-    # If you get here, auth is good. Take action based on player info and action
+    # Take action based on player info and action
     action_to_do, function_to_run = route_action(action=action, actions_map=actions_map)
 
     # Give the player the input action and its enhanced flag
@@ -126,10 +128,15 @@ def build_actions_map(context: str) -> Dict:
 
     if context == 'home':
         combined_actions_map.update(HOME_ACTIONS_MAP)
-    if context == 'home':
+    if context == 'combat':
         combined_actions_map.update(COMBAT_ACTIONS_MAP)
-    #if context == 'text_adventure':
-    #    combined_actions_map.update(TEXT_ADVENTURE_ACTIONS_MAP)
+    if context == 'text_adventure':
+        # Remove the common actions so they don't clash with the
+        # commands in the text adventure, leaving only "default.
+        # This is now a pass-through to the text adventure game engine
+        for key in combined_actions_map:
+            del combined_actions_map[key]
+        combined_actions_map.update(TEXT_ADVENTURE_ACTIONS_MAP)
 
     return combined_actions_map
 
