@@ -6,10 +6,11 @@ except ImportError:
 import json
 
 from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
 from typing import Dict, Any
 
 try:
+    from player_data import Player
     from combat_utilities import (
         calculate_winner,
         check_dead,
@@ -20,6 +21,7 @@ try:
         apply_ex,
     )
 except ImportError:
+    from .player_data import Player
     from .combat_utilities import (
         calculate_winner,
         check_dead,
@@ -31,26 +33,6 @@ except ImportError:
     )
 
 LambdaDict = Dict[str, Any]
-
-
-@dataclass
-class Player:
-    """
-    Class to hold player information
-    """
-
-    name: str
-    character_class: str
-    max_hit_points: int
-    max_ex: int
-    hit_points: int
-    ex: int
-    status_effects: list
-    action: str
-    enhanced: bool
-    auth_token: str
-    context: str
-    history: list
 
 
 def do_combat(event: LambdaDict, context: LambdaDict) -> LambdaDict:
