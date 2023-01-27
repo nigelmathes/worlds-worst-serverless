@@ -3,6 +3,6 @@
   "description": "",
   "version": "0.1.0",
   "dependencies": {
-    "serverless": "^2.44.0"
+    "serverless": "^3.27.0"
   }
 }
